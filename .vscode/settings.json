@@ -1,0 +1,15 @@
+{
+    "java.jdt.ls.java.home": "C:\\Program Files\\Java\\jdk-25.0.4.1",
+    "java.jdt.ls.lombokSupport.enabled": false,
+    "maven.terminal.favorites": [
+        {
+            "command": "clean install",
+            "debug": false
+        },
+        {
+            "command": "-U clean install",
+            "debug": false
+        }
+    ],
+    "java.search.scope": "all"
+}
