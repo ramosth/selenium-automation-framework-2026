@@ -35,8 +35,7 @@ public class LoginTest extends BaseTest {
         test = ExtentReportManager.createTest("Teste de Login Inválido");
         LoginPage loginPage = new LoginPage(driver);
         test.info("Iniciando o teste de login inválido.");
-        // loginPage.login("invalid_user", "invalid_password");
-        loginPage.login("standard_user", "secret_sauce");
+        loginPage.login("invalid_user", "invalid_password");
         test.info("Entrando com credenciais inválidas e clicando no botão de login.");
         loginPage.isErrorMessageDisplayed(); // Aqui você pode verificar se a mensagem de erro está visível
         loginPage.getErrorMessage(); // Aqui você pode verificar o texto da mensagem de erro
