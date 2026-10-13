@@ -1,0 +1,34 @@
+# ============================================================
+# Configurações do projeto
+# Modelo: copie este arquivo para config.properties (mesma pasta) e preencha os seus dados.
+# O config.properties fica fora do Git (.gitignore) porque guarda senha.
+# Qualquer chave pode ser trocada numa execução: mvn test -Dbrowser=firefox
+# ============================================================
+
+# ---------- Aplicação ----------
+base.url=https://www.saucedemo.com/
+# Usuário usado como pré-condição nos testes de carrinho e checkout (credenciais públicas do Sauce Demo)
+standard.username=standard_user
+standard.password=secret_sauce
+
+# ---------- Navegador ----------
+# chrome | firefox | edge
+browser=chrome
+# true = roda sem abrir a janela do navegador
+headless=false
+# Tempo máximo (em segundos) das esperas explícitas
+timeout.seconds=10
+
+# ---------- E-mail do relatório ----------
+# true = envia o relatório ao final de cada execução | false = não envia
+email.enabled=false
+email.smtp.host=smtp.gmail.com
+email.smtp.port=587
+# Conta que envia (Gmail com verificação em 2 etapas + senha de app)
+email.sender=seu.email@gmail.com
+# Senha de app de 16 letras gerada em https://myaccount.google.com/apppasswords (sem espaços)
+email.appPassword=sua_senha_de_app
+# Destinatários separados por vírgula
+email.recipients=destinatario1@email.com,destinatario2@email.com
+# true mostra no console toda a conversa com o servidor SMTP (útil para depurar)
+email.debug=false

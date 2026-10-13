@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Suíte completa (padrão do "mvn test"). Roda todos os módulos. -->
+<suite name="Regressão - Sauce Demo" verbose="1">
+    <test name="Login">
+        <classes>
+            <!-- <class name="com.test.automation.tests.login.LoginTest" /> -->
+            <class name="com.test.automation.tests.login.LoginTestData" />
+        </classes>
+    </test>
+    <test name="Carrinho e Checkout">
+        <classes>
+            <class name="com.test.automation.tests.cart.CartTest" />
+            <class name="com.test.automation.tests.checkout.CheckoutTest" />
+        </classes>
+    </test>
+</suite>

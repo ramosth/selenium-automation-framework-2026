@@ -230,3 +230,11 @@ coverage*.xml
 coverage*.info
 .vshistory/
 healthchecksdb
+
+### Projeto ###
+# Configuração local com credenciais (o modelo config.properties.example é versionado)
+config.properties
+# Build do Maven (gerado a cada execução)
+target/
+# Backup local da reorganização
+_backup_*.zip

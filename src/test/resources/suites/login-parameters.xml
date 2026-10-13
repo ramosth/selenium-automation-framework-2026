@@ -1,0 +1,37 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!--
+    Dados de teste vindos do próprio XML do TestNG.
+    Cada <test> roda LoginTestParameters uma vez, com os parâmetros definidos nele.
+    Os nomes dos parâmetros seguem as mesmas colunas da planilha:
+    testId | scenario | username | password | expectedResult | expectedMessage
+
+    IMPORTANTE: rodar pela suíte (o XML), e não pelo botão "play" da classe,
+    senão o TestNG não recebe os parâmetros.
+    Terminal: mvn test -Dsuite=login-parameters
+-->
+<suite name="Selenium Test Suite Data" verbose="1">
+
+    <test name="CT01 - Login com usuário padrão">
+        <parameter name="testId" value="CT01" />
+        <parameter name="scenario" value="Login com usuário padrão" />
+        <parameter name="username" value="standard_user" />
+        <parameter name="password" value="secret_sauce" />
+        <parameter name="expectedResult" value="SUCCESS" />
+        <classes>
+            <class name="com.test.automation.tests.login.LoginTestParameters" />
+        </classes>
+    </test>
+
+    <test name="CT06 - Login com usuário bloqueado">
+        <parameter name="testId" value="CT06" />
+        <parameter name="scenario" value="Login com usuário bloqueado" />
+        <parameter name="username" value="locked_out_user" />
+        <parameter name="password" value="secret_sauce" />
+        <parameter name="expectedResult" value="ERROR" />
+        <parameter name="expectedMessage" value="Epic sadface: Sorry, this user has been locked out." />
+        <classes>
+            <class name="com.test.automation.tests.login.LoginTestParameters" />
+        </classes>
+    </test>
+
+</suite>
