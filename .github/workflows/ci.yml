@@ -1,0 +1,79 @@
+# ============================================================
+# CI - Selenium Automation Framework (Sauce Demo)
+#
+# Quando roda:
+#   - a cada push e pull request na branch master;
+#   - manualmente pela aba "Actions" > "CI - Testes Selenium" > "Run workflow",
+#     escolhendo a suíte (regression, login, checkout, login-parameters) e o navegador.
+#
+# O que faz:
+#   1. instala o Java 17 e baixa as dependências do Maven (com cache);
+#   2. cria o config.properties a partir do modelo (o arquivo real fica fora do Git);
+#   3. roda a suíte em modo headless (sem abrir janela), com o envio de e-mail desligado;
+#   4. publica o relatório Extent, os prints e os logs como "artifacts" da execução,
+#      mesmo quando algum teste falha.
+# ============================================================
+name: CI - Testes Selenium
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "Suíte do TestNG (src/test/resources/suites)"
+        type: choice
+        options: [regression, login, checkout, login-parameters]
+        default: regression
+      browser:
+        description: "Navegador"
+        type: choice
+        options: [chrome, firefox]
+        default: chrome
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      # Em push/PR os inputs não existem, então usamos os valores padrão
+      SUITE: ${{ inputs.suite || 'regression' }}
+      BROWSER: ${{ inputs.browser || 'chrome' }}
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar Java 17 (com cache do Maven)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Criar config.properties a partir do modelo
+        run: cp src/test/resources/config.properties.example src/test/resources/config.properties
+
+      - name: Rodar a suíte ${{ env.SUITE }} no ${{ env.BROWSER }} (headless)
+        run: >
+          mvn -B test
+          -Dsuite=${{ env.SUITE }}
+          -Dbrowser=${{ env.BROWSER }}
+          -Dheadless=true
+          -Demail.enabled=false
+
+      - name: Publicar relatório, prints e logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-${{ env.SUITE }}-${{ github.run_number }}
+          path: |
+            reports/
+            screenshots/
+            logs/
+            target/surefire-reports/
+          retention-days: 14
+          if-no-files-found: warn
