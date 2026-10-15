@@ -51,30 +51,43 @@ public abstract class BasePage {
 
     // ---------- Esperas ----------
 
+    /** Espera o elemento ficar visível; retorna o próprio elemento. */
     public WebElement waitVisible(WebElement element) {
         Log.info("Aguardando visibilidade do elemento: " + element);
         return wait.until(ExpectedConditions.visibilityOf(element));
     }
 
+    /** Espera o elemento ficar visível; retorna o próprio elemento. */
     public WebElement waitVisible(By locator) {
         Log.info("Aguardando visibilidade do elemento: " + locator);
         return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
+    /** Espera o elemento ficar clicável; retorna o próprio elemento. */
     public WebElement waitClickable(WebElement element) {
         return wait.until(ExpectedConditions.elementToBeClickable(element));
     }
 
+    /** Espera o elemento ficar clicável; retorna o próprio elemento. */
     public WebElement waitClickable(By locator) {
         return wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
     // ---------- Ações genéricas ----------
 
+    /**
+     * WebElement é usado quando o elemento já foi localizado e está disponível,
+     * enquanto By é usado para localizar o elemento na página. O By é uma forma de
+     * especificar como encontrar um elemento (por exemplo, por ID, nome, CSS
+     * selector, etc.), enquanto WebElement representa o próprio elemento na página.
+     */
+
+    /** Clica no elemento, esperando ele ficar clicável. */
     protected void click(WebElement element) {
         waitClickable(element).click();
     }
 
+    /** Clica no elemento localizado pelo By, esperando ele ficar clicável. */
     protected void click(By locator) {
         waitClickable(locator).click();
     }
@@ -127,6 +140,26 @@ public abstract class BasePage {
             Log.warn("Título '" + expectedTitle + "' não apareceu dentro do tempo de espera.");
             return false;
         }
+    }
+
+    /**
+     * Espera a URL conter o trecho esperado; false se não acontecer no tempo
+     * limite.
+     */
+    public boolean hasPageUrl(String expectedUrl) {
+        try {
+            return wait.until(ExpectedConditions.urlContains(expectedUrl));
+        } catch (TimeoutException e) {
+            Log.warn("URL com '" + expectedUrl + "' não apareceu dentro do tempo de espera.");
+            return false;
+        }
+    }
+
+    /**
+     * Extrai o valor numérico de um texto no formato "Label: $123.45" ou "$29.99".
+     */
+    protected double extractValue(String label) {
+        return Double.parseDouble(label.substring(label.indexOf('$') + 1));
     }
 
     // ---------- Verificações genéricas (vindas da primeira aula) ----------

@@ -36,10 +36,10 @@ public class CartTest extends BaseTest {
         }
         test.info("Produtos adicionados: " + productList);
 
-        Assert.assertEquals(inventoryPage.getCartBadgeCount(), Integer.parseInt(expectedCount),
+        Assert.assertEquals(inventoryPage.header().getCartBadgeCount(), Integer.parseInt(expectedCount),
                 "Quantidade no ícone do carrinho diferente da esperada.");
 
-        CartPage cartPage = inventoryPage.openCart();
+        CartPage cartPage = inventoryPage.header().openCart();
         Assert.assertTrue(cartPage.isLoaded(), "A página do carrinho não foi exibida.");
         Assert.assertEqualsNoOrder(cartPage.getItemNames().toArray(), productList.toArray(),
                 "Os itens do carrinho são diferentes dos produtos adicionados.");

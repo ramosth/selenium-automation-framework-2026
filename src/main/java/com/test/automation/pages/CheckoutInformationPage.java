@@ -5,6 +5,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+import com.test.automation.pages.components.FooterComponent;
+import com.test.automation.pages.components.HeaderComponent;
 import com.test.automation.utils.Log;
 
 /**
@@ -36,6 +38,20 @@ public class CheckoutInformationPage extends BasePage {
         super(driver);
     }
 
+    /**
+     * Retorna o componente de cabeçalho da página.
+     */
+    public HeaderComponent header() {
+        return new HeaderComponent(driver);
+    }
+
+    /**
+     * Retorna o componente de rodapé da página.
+     */
+    public FooterComponent footer() {
+        return new FooterComponent(driver);
+    }
+
     public boolean isLoaded() {
         return hasTitle(TITLE);
     }
@@ -47,7 +63,10 @@ public class CheckoutInformationPage extends BasePage {
         type(postalCodeInputElement, postalCode);
     }
 
-    /** Clica em Continue. Se os dados forem válidos, a próxima página é a de resumo (Overview). */
+    /**
+     * Clica em Continue. Se os dados forem válidos, a próxima página é a de resumo
+     * (Overview).
+     */
     public void clickContinue() {
         click(continueButtonElement);
     }

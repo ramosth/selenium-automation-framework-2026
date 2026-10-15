@@ -32,7 +32,7 @@ public class CheckoutTest extends BaseTest {
         // Pré-condição: usuário logado, com um produto no carrinho, na tela de dados do checkout
         InventoryPage inventoryPage = new LoginPage(driver).loginAsStandardUser();
         inventoryPage.addProductToCart(PRODUCT);
-        CheckoutInformationPage informationPage = inventoryPage.openCart().goToCheckout();
+        CheckoutInformationPage informationPage = inventoryPage.header().openCart().goToCheckout();
         Assert.assertTrue(informationPage.isLoaded(), "A tela de dados do checkout não foi exibida.");
 
         informationPage.fillInformation(firstName, lastName, postalCode);
