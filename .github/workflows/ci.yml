@@ -9,7 +9,9 @@
 # O que faz:
 #   1. instala o Java 17 e baixa as dependências do Maven (com cache);
 #   2. cria o config.properties a partir do modelo (o arquivo real fica fora do Git);
-#   3. roda a suíte em modo headless (sem abrir janela), com o envio de e-mail desligado;
+#   3. roda a suíte em modo headless (sem abrir janela);
+#      o relatório é enviado por e-mail SE os segredos EMAIL_* estiverem cadastrados
+#      (Settings > Secrets and variables > Actions). Sem eles, o envio fica desligado;
 #   4. publica o relatório Extent, os prints e os logs como "artifacts" da execução,
 #      mesmo quando algum teste falha.
 # ============================================================
@@ -58,12 +60,25 @@ jobs:
         run: cp src/test/resources/config.properties.example src/test/resources/config.properties
 
       - name: Rodar a suíte ${{ env.SUITE }} no ${{ env.BROWSER }} (headless)
-        run: >
-          mvn -B test
-          -Dsuite=${{ env.SUITE }}
-          -Dbrowser=${{ env.BROWSER }}
-          -Dheadless=true
-          -Demail.enabled=false
+        # Os segredos entram como variáveis de ambiente e o GitHub os mascara no log (***).
+        # Eles chegam ao framework via -D, que tem prioridade sobre o config.properties.
+        env:
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
+        run: |
+          # Liga o e-mail só se a senha de app foi cadastrada nos segredos
+          if [ -n "$EMAIL_APP_PASSWORD" ]; then EMAIL_ENABLED=true; else EMAIL_ENABLED=false; fi
+          echo "Envio de e-mail: $EMAIL_ENABLED"
+
+          mvn -B test \
+            -Dsuite="$SUITE" \
+            -Dbrowser="$BROWSER" \
+            -Dheadless=true \
+            -Demail.enabled="$EMAIL_ENABLED" \
+            -Demail.sender="$EMAIL_SENDER" \
+            -Demail.appPassword="$EMAIL_APP_PASSWORD" \
+            -Demail.recipients="$EMAIL_RECIPIENTS"
 
       - name: Publicar relatório, prints e logs
         if: always()
