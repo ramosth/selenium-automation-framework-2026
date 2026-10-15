@@ -22,7 +22,8 @@ public class InventoryPage extends BasePage {
     @FindBy(css = "[data-test='shopping-cart-link']")
     private WebElement cartLinkElement;
 
-    // O contador do carrinho só existe quando há itens; por isso é buscado com findElements
+    // O contador do carrinho só existe quando há itens; por isso é buscado com
+    // findElements
     private final By cartBadge = By.cssSelector("[data-test='shopping-cart-badge']");
 
     public InventoryPage(WebDriver driver) {
@@ -37,11 +38,12 @@ public class InventoryPage extends BasePage {
         return getTexts(productNameElements);
     }
 
-    // Botão "Add to cart"/"Remove" do card do produto com o nome informado
-    private WebElement productButton(String productName) {
-        By button = By.xpath("//div[@data-test='inventory-item'][.//div[@data-test='inventory-item-name' and normalize-space()='"
-                + productName + "']]//button");
-        return driver.findElement(button);
+    // Localizador do botão "Add to cart"/"Remove" do card do produto com o nome
+    // informado
+    private By productButton(String productName) {
+        return By.xpath(
+                "//div[@data-test='inventory-item'][.//div[@data-test='inventory-item-name' and normalize-space()='"
+                        + productName + "']]//button");
     }
 
     public void addProductToCart(String productName) {

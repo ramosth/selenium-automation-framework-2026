@@ -20,19 +20,24 @@ import com.test.automation.utils.Log;
 /**
  * Classe base de todas as páginas (Page Object).
  *
- * Guarda o que é comum a qualquer página: o driver, a espera explícita (WebDriverWait),
- * a inicialização dos elementos (PageFactory) e ações genéricas (clicar, digitar, ler texto, esperar).
+ * Guarda o que é comum a qualquer página: o driver, a espera explícita
+ * (WebDriverWait),
+ * a inicialização dos elementos (PageFactory) e ações genéricas (clicar,
+ * digitar, ler texto, esperar).
  * Cada página herda daqui e só declara os próprios elementos e ações.
  *
- * Regra do Page Object: a página não faz Assert. Ela executa ações e responde perguntas
- * (true/false, textos, listas); quem decide se o teste passou é a classe de teste.
+ * Regra do Page Object: a página não faz Assert. Ela executa ações e responde
+ * perguntas
+ * (true/false, textos, listas); quem decide se o teste passou é a classe de
+ * teste.
  */
 public abstract class BasePage {
 
     protected WebDriver driver;
     protected WebDriverWait wait;
 
-    // Título exibido no topo das páginas internas do Sauce Demo ("Products", "Your Cart", ...)
+    // Título exibido no topo das páginas internas do Sauce Demo ("Products", "Your
+    // Cart", ...)
     @FindBy(className = "title")
     protected WebElement pageTitleElement;
 
@@ -51,14 +56,27 @@ public abstract class BasePage {
         return wait.until(ExpectedConditions.visibilityOf(element));
     }
 
+    public WebElement waitVisible(By locator) {
+        Log.info("Aguardando visibilidade do elemento: " + locator);
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    }
+
     public WebElement waitClickable(WebElement element) {
         return wait.until(ExpectedConditions.elementToBeClickable(element));
+    }
+
+    public WebElement waitClickable(By locator) {
+        return wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
     // ---------- Ações genéricas ----------
 
     protected void click(WebElement element) {
         waitClickable(element).click();
+    }
+
+    protected void click(By locator) {
+        waitClickable(locator).click();
     }
 
     /** Limpa o campo e digita o texto. */
@@ -81,7 +99,9 @@ public abstract class BasePage {
         return elements.stream().map(WebElement::getText).collect(Collectors.toList());
     }
 
-    /** true se o elemento estiver na tela, sem lançar exceção quando ele não existe. */
+    /**
+     * true se o elemento estiver na tela, sem lançar exceção quando ele não existe.
+     */
     protected boolean isDisplayed(WebElement element) {
         try {
             return element.isDisplayed();
@@ -96,7 +116,10 @@ public abstract class BasePage {
         return waitVisible(pageTitleElement).getText();
     }
 
-    /** Espera o título da página ficar igual ao esperado; false se não acontecer no tempo limite. */
+    /**
+     * Espera o título da página ficar igual ao esperado; false se não acontecer no
+     * tempo limite.
+     */
     public boolean hasTitle(String expectedTitle) {
         try {
             return wait.until(ExpectedConditions.textToBePresentInElementLocated(By.className("title"), expectedTitle));
@@ -117,14 +140,16 @@ public abstract class BasePage {
     public void checkElementText(WebElement element, String expectedText) {
         String actualText = element.getText();
         if (!actualText.equals(expectedText)) {
-            throw new RuntimeException("Texto do elemento não corresponde. Esperado: " + expectedText + ", Atual: " + actualText);
+            throw new RuntimeException(
+                    "Texto do elemento não corresponde. Esperado: " + expectedText + ", Atual: " + actualText);
         }
     }
 
     public void errorMessageContainsText(WebElement element, String expectedText) {
         String actualText = element.getText();
         if (!actualText.contains(expectedText)) {
-            throw new RuntimeException("Mensagem de erro não contém o texto esperado. Esperado: " + expectedText + ", Atual: " + actualText);
+            throw new RuntimeException("Mensagem de erro não contém o texto esperado. Esperado: " + expectedText
+                    + ", Atual: " + actualText);
         }
     }
 
@@ -155,7 +180,8 @@ public abstract class BasePage {
     public void checkElementAttribute(WebElement element, String attributeName, String expectedValue) {
         String actualValue = element.getAttribute(attributeName);
         if (!expectedValue.equals(actualValue)) {
-            throw new RuntimeException("Atributo do elemento não corresponde. Esperado: " + expectedValue + ", Atual: " + actualValue);
+            throw new RuntimeException(
+                    "Atributo do elemento não corresponde. Esperado: " + expectedValue + ", Atual: " + actualValue);
         }
     }
 }
