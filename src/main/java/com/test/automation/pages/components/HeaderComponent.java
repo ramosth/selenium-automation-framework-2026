@@ -16,7 +16,8 @@ import com.test.automation.utils.Log;
 
 /**
  * Componente de cabeçalho (header): menu lateral e ícone do carrinho.
- * Presente em todas as páginas internas; cada página o oferece pelo método header().
+ * Presente em todas as páginas internas; cada página o oferece pelo método
+ * header().
  */
 public class HeaderComponent extends BasePage {
 
@@ -59,7 +60,10 @@ public class HeaderComponent extends BasePage {
 
     // ---------- PERGUNTAS ----------
 
-    /** true se o menu lateral estiver aberto (o botão X só aparece com o menu aberto). */
+    /**
+     * true se o menu lateral estiver aberto (o botão X só aparece com o menu
+     * aberto).
+     */
     public boolean isMenuOpen() {
         return isDisplayed(closeMenuButtonElement);
     }
@@ -75,6 +79,24 @@ public class HeaderComponent extends BasePage {
         return badge.isEmpty() ? 0 : Integer.parseInt(badge.get(0).getText());
     }
 
+    /**
+     * Endereço do link 'About' (abre o menu, se estiver fechado, para ler o link).
+     */
+    public String getAboutLinkUrl() {
+        openMenu();
+        return aboutLinkElement.getAttribute("href");
+    }
+
+    /**
+     * Atributo target do link 'About'.
+     * Vazio = abre na mesma aba; "_blank" = abre em nova aba.
+     */
+    public String getAboutLinkTarget() {
+        openMenu();
+        String target = aboutLinkElement.getAttribute("target");
+        return target == null ? "" : target;
+    }
+
     // ---------- AÇÕES: menu ----------
 
     /** Abre o menu lateral. Se já estiver aberto, não faz nada. */
@@ -87,7 +109,9 @@ public class HeaderComponent extends BasePage {
         waitVisible(closeMenuButtonElement); // espera o menu terminar de abrir
     }
 
-    /** Fecha o menu lateral e espera ele sumir. Se já estiver fechado, não faz nada. */
+    /**
+     * Fecha o menu lateral e espera ele sumir. Se já estiver fechado, não faz nada.
+     */
     public void closeMenu() {
         if (!isMenuOpen()) {
             return;
@@ -105,7 +129,10 @@ public class HeaderComponent extends BasePage {
         return new InventoryPage(driver);
     }
 
-    /** Abre o menu e expande o submenu do Dynamic Catalog (não navega, só mostra as opções). */
+    /**
+     * Abre o menu e expande o submenu do Dynamic Catalog (não navega, só mostra as
+     * opções).
+     */
     public void expandDynamicCatalog() {
         openMenu();
         if (!isDynamicCatalogExpanded()) {
@@ -115,25 +142,37 @@ public class HeaderComponent extends BasePage {
         waitVisible(lazyLoadLink); // espera as opções aparecerem
     }
 
-    /** Vai para Dynamic Catalog > Lazy Load. Quando a página existir, este método passa a devolvê-la. */
+    /**
+     * Vai para Dynamic Catalog > Lazy Load. Quando a página existir, este método
+     * passa a devolvê-la.
+     */
     public void goToLazyLoad() {
         expandDynamicCatalog();
         click(lazyLoadLink);
     }
 
-    /** Vai para Dynamic Catalog > Spinner. Quando a página existir, este método passa a devolvê-la. */
+    /**
+     * Vai para Dynamic Catalog > Spinner. Quando a página existir, este método
+     * passa a devolvê-la.
+     */
     public void goToSpinner() {
         expandDynamicCatalog();
         click(spinnerLink);
     }
 
-    /** Vai para Dynamic Catalog > Slider. Quando a página existir, este método passa a devolvê-la. */
+    /**
+     * Vai para Dynamic Catalog > Slider. Quando a página existir, este método passa
+     * a devolvê-la.
+     */
     public void goToSlider() {
         expandDynamicCatalog();
         click(sliderLink);
     }
 
-    /** Abre o menu e clica em 'About'. Leva para o site da Sauce Labs (o teste confere a URL). */
+    /**
+     * Abre o menu e clica em 'About'. Leva para o site da Sauce Labs (o teste
+     * confere a URL).
+     */
     public void goToAbout() {
         openMenu();
         Log.info("Clicando em About.");
@@ -148,7 +187,10 @@ public class HeaderComponent extends BasePage {
         return new LoginPage(driver);
     }
 
-    /** Abre o menu e clica em 'Reset App State' (limpa o carrinho). O menu continua aberto. */
+    /**
+     * Abre o menu e clica em 'Reset App State' (limpa o carrinho). O menu continua
+     * aberto.
+     */
     public void resetAppState() {
         openMenu();
         Log.info("Clicando em Reset App State.");

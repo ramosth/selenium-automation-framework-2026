@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -180,6 +181,19 @@ public abstract class BasePage {
      */
     protected double extractValue(String label) {
         return Double.parseDouble(label.substring(label.indexOf('$') + 1));
+    }
+
+    /** Quantidade de abas/janelas abertas no navegador. */
+    public int getOpenTabsCount() {
+        return driver.getWindowHandles().size();
+    }
+
+    /**
+     * Rola a página até o elemento ficar no centro da tela (útil para o print
+     * mostrar o elemento).
+     */
+    protected void scrollTo(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
     }
 
     // ---------- Verificações genéricas (vindas da primeira aula) ----------

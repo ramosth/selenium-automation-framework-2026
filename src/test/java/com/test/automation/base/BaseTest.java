@@ -24,11 +24,14 @@ import com.test.automation.utils.ScreenshotUtils;
  * Classe base de todos os testes.
  *
  * Ciclo de vida:
- *  @BeforeSuite  -> cria o Extent Report (uma vez por execução)
- *  @BeforeMethod -> abre o navegador na URL da aplicação (antes de cada teste)
- *  @AfterMethod  -> registra o resultado no relatório, tira o print e fecha o navegador
- *  @AfterSuite   -> grava o relatório em disco
- *  EmailReportListener -> envia o relatório por e-mail ao final da suíte
+ * 
+ * @BeforeSuite -> cria o Extent Report (uma vez por execução)
+ * @BeforeMethod -> abre o navegador na URL da aplicação (antes de cada teste)
+ * @AfterMethod -> registra o resultado no relatório, tira o print e fecha o
+ *              navegador
+ * @AfterSuite -> grava o relatório em disco
+ *             EmailReportListener -> envia o relatório por e-mail ao final da
+ *             suíte
  */
 @Listeners(EmailReportListener.class)
 public class BaseTest {
@@ -64,16 +67,18 @@ public class BaseTest {
     public void tearDown(ITestResult result) {
         Log.info("Finalizando o teste.");
 
-        // Se o teste quebrar antes de criar o registro no relatório, cria aqui para não dar NullPointerException
+        // Se o teste quebrar antes de criar o registro no relatório, cria aqui para não
+        // dar NullPointerException
         if (test == null) {
             test = ExtentReportManager.createTest(result.getName());
         }
 
-        // No data-driven o nome do método é o mesmo em todas as linhas (ex.: testLogin),
-        // então o primeiro parâmetro (ex.: CT07) entra no nome do print para não confundir
-        String screenshotName = result.getName();
+        // No data-driven o nome do método é o mesmo em todas as linhas (ex.:
+        // testLogin),
+        // então o primeiro parâmetro (ex.: CT07) entra no nome do print para não
+        // confundir
+        String screenshotName = buildScreenshotName(result);
         if (result.getParameters().length > 0) {
-            screenshotName += "_" + result.getParameters()[0];
             Log.info("Parâmetros do teste: " + Arrays.toString(result.getParameters()));
         }
 
@@ -99,6 +104,31 @@ public class BaseTest {
             Log.info("Limpando o ambiente de testes e fechando o navegador.");
             driver.quit();
         }
-        test = null; // limpa para a próxima execução (importante no data-driven, que reaproveita a mesma instância)
+        test = null; // limpa para a próxima execução (importante no data-driven, que reaproveita a
+                     // mesma instância)
+    }
+
+    /**
+     * Nome do print: método + id do cenário + 1º parâmetro (quando houver).
+     * O id (ex.: FTR01, CT07) é o começo do nome do teste no relatório, antes do "
+     * - ".
+     * Exemplos: testSocialLinks_FTR01 | testLogin_CT07 |
+     * testSortByNameZToA_ORD02_problem_user
+     */
+    private String buildScreenshotName(ITestResult result) {
+        String name = result.getName();
+
+        String id = test.getModel().getName().split(" - ")[0];
+        if (id.matches("[A-Z]+\\d+")) {
+            name += "_" + id;
+        }
+
+        if (result.getParameters().length > 0) {
+            String firstParameter = String.valueOf(result.getParameters()[0]);
+            if (!firstParameter.equals(id)) {
+                name += "_" + firstParameter;
+            }
+        }
+        return name;
     }
 }

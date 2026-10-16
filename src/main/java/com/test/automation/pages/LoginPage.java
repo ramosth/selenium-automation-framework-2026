@@ -33,6 +33,15 @@ public class LoginPage extends BasePage {
         super(driver);
     }
 
+    /** Espera a tela de login aparecer; false se não aparecer no tempo limite. */
+    public boolean isLoaded() {
+        try {
+            return waitVisible(loginButtonElement).isDisplayed();
+        } catch (TimeoutException e) {
+            return false;
+        }
+    }
+
     public void enterUsername(String username) {
         Log.info("Inserindo nome de usuário: '" + username + "'");
         type(usernameInputElement, username);

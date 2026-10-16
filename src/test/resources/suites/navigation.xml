@@ -1,0 +1,10 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Menu lateral e rodapé. Executar: mvn test -Dsuite=navigation -->
+<suite name="Navegação - Sauce Demo" verbose="1">
+    <test name="Menu lateral e rodapé">
+        <classes>
+            <class name="com.test.automation.tests.navigation.SideMenuTest" />
+            <class name="com.test.automation.tests.navigation.FooterTest" />
+        </classes>
+    </test>
+</suite>

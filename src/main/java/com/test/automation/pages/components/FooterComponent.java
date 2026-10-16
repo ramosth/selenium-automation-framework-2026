@@ -23,6 +23,9 @@ public class FooterComponent extends BasePage {
     @FindBy(css = "[data-test='footer-copy']")
     private WebElement copyRightElement;
 
+    @FindBy(css = "[data-test='footer']")
+    private WebElement footerElement;
+
     public FooterComponent(WebDriver driver) {
         super(driver);
     }
@@ -67,9 +70,26 @@ public class FooterComponent extends BasePage {
         return socialFacebookElement.getAttribute("href");
     }
 
-    /** Endereço do link do LinkedIn (ex.: https://www.linkedin.com/company/sauce-labs/). */
+    /**
+     * Endereço do link do LinkedIn (ex.:
+     * https://www.linkedin.com/company/sauce-labs/).
+     */
     public String getLinkedInLinkUrl() {
         return socialLinkedinElement.getAttribute("href");
+    }
+
+    /**
+     * Rola a página até o rodapé (para o print do relatório mostrar o componente).
+     */
+    public void scrollIntoView() {
+        scrollTo(footerElement);
+    }
+
+    /** true se os 3 links de redes sociais abrem em nova aba (target="_blank"). */
+    public boolean socialLinksOpenInNewTab() {
+        return "_blank".equals(socialXElement.getAttribute("target"))
+                && "_blank".equals(socialFacebookElement.getAttribute("target"))
+                && "_blank".equals(socialLinkedinElement.getAttribute("target"));
     }
 
 }

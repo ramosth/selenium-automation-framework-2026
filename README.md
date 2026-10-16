@@ -43,6 +43,7 @@ selenium-framework/
 │   │   │   └── ConfigReader.java           # Lê o config.properties
 │   │   ├── data/                           # Modelos de dados (usados pelas páginas e pelos testes)
 │   │   │   ├── User.java                   # enum com os usuários do Sauce Demo
+│   │   │   ├── Product.java                # enum com os produtos do catálogo (nome, id, preço)
 │   │   │   ├── ProductScenario.java        # record: um cenário do teste de detalhes do produto
 │   │   │   └── OrderScenario.java          # record: um cenário do cálculo do resumo do pedido
 │   │   ├── driver/
@@ -92,9 +93,12 @@ selenium-framework/
 │   │       │   └── ProductDetailsUsersTest.java  # Detalhes com os outros usuários (defeitos)
 │   │       ├── cart/
 │   │       │   └── CartTest.java
-│   │       └── checkout/
-│   │           ├── CheckoutTest.java
-│   │           └── OrderSummaryTest.java   # Cálculo do resumo: item total, taxa e total
+│   │       ├── checkout/
+│   │       │   ├── CheckoutTest.java
+│   │       │   └── OrderSummaryTest.java   # Cálculo do resumo: item total, taxa e total
+│   │       └── navigation/                 # Partes presentes em todas as páginas
+│   │           ├── SideMenuTest.java       # Menu lateral: All Items, About, Logout, Reset App State
+│   │           └── FooterTest.java         # Rodapé: redes sociais e copyright
 │   └── test/resources/
 │       ├── config.properties.example       # Modelo de configuração (versionado)
 │       ├── config.properties               # Configuração local com senha (NÃO versionado)
@@ -110,7 +114,8 @@ selenium-framework/
 │           ├── login-parameters.xml        # Login com parâmetros no próprio XML
 │           ├── checkout.xml
 │           ├── inventory.xml               # Ordenação e detalhes do produto
-│           └── product-users.xml           # Detalhes do produto com os outros usuários
+│           ├── product-users.xml           # Detalhes do produto com os outros usuários
+│           └── navigation.xml              # Menu lateral e rodapé
 ├── docs/exemplos-aula/                     # Material de estudo, fora da compilação
 │   └── LoginPageBasica.java                # Page Object com By (antes do PageFactory)
 ├── reports/      # (gerado) relatórios HTML           ┐
@@ -182,12 +187,13 @@ mvn test -Dbrowser=firefox -Dheadless=true -Demail.enabled=false
 
 | Comando | O que roda | Resultado esperado |
 |---|---|---|
-| `mvn test` | Regressão (`regression.xml`): login, carrinho, checkout, cálculo do resumo e detalhes do produto | tudo passa |
+| `mvn test` | Regressão (`regression.xml`): login, carrinho, checkout, cálculo do resumo, detalhes do produto, menu lateral e rodapé | tudo passa |
 | `mvn test -Dsuite=login` | Só login | tudo passa |
 | `mvn test -Dsuite=login-parameters` | Login com parâmetros do XML | tudo passa |
 | `mvn test -Dsuite=checkout` | Carrinho, checkout e cálculo do resumo do pedido | tudo passa |
 | `mvn test -Dsuite=inventory` | Ordenação (5 usuários) e detalhes do produto (usuário padrão) | 32 execuções, **8 falhas esperadas** |
 | `mvn test -Dsuite=product-users` | Detalhes do produto com os outros usuários | 16 execuções, **10 falhas esperadas** |
+| `mvn test -Dsuite=navigation` | Menu lateral (inclui acesso sem login) e rodapé | tudo passa |
 | `mvn clean test` | Limpa o build antes de rodar | |
 
 **A regressão precisa ficar sempre verde**: é ela que roda na CI a cada push. Os testes que expõem os defeitos conhecidos dos usuários especiais ficam em suítes próprias (`inventory`, `product-users`). As falhas delas são esperadas e mostram que os testes encontram os bugs.
@@ -197,7 +203,8 @@ Pelo VS Code, o botão ▶ ao lado da classe ou do método também funciona, exc
 ### Saídas de cada execução
 
 - `reports/ExtentReport_<data-hora>.html`: relatório com passos, resultado e prints das falhas.
-- `screenshots/SUCCESS|FAILURE|SKIP/<teste>_<id>_<data-hora>.png`
+- `screenshots/SUCCESS|FAILURE|SKIP/<método>_<id>_<parâmetro>_<data-hora>.png`, por exemplo `testSortByNameZToA_ORD02_problem_user_...png`.
+  O id vem do nome do teste no relatório, no padrão **`ID - descrição`** (ex.: `FTR01 - Links das redes sociais`). Testes que seguem esse padrão ganham o id no print automaticamente.
 - `logs/selenium-framework.log`
 - E-mail com o resumo (passou/falhou) e o relatório anexo, se `email.enabled=true`.
 
@@ -211,7 +218,7 @@ Cada tipo de dado fica num lugar:
 |---|---|---|
 | Configuração do ambiente (URL, navegador, senhas) | `config.properties` ou `-D` na linha de comando | `browser=chrome` |
 | Massa de dados dos cenários | Excel ou JSON em `testdata/` | `LoginData.xlsx`, `product-scenarios.json` |
-| Constantes do sistema (lista fechada, usada pelo nome) | `enum` ou constantes no código | `User.PROBLEM`, `InventoryPage.SORT_NAME_A_TO_Z` |
+| Constantes do sistema (lista fechada, usada pelo nome) | `enum` ou constantes no código | `User.PROBLEM`, `Product.BACKPACK`, `InventoryPage.SORT_NAME_A_TO_Z` |
 
 Em todos os formatos, **um cenário por linha, com os valores esperados escritos**. Para criar um cenário novo, basta acrescentar uma linha, sem mexer no código.
 
@@ -298,18 +305,25 @@ O `config.properties` real não vai para o Git. Na CI, ele é criado a partir do
 | Carrinho | Adicionar 1, 2 e todos os produtos (contador e itens no carrinho) |
 | Checkout | Compra concluída e validação dos 3 campos obrigatórios |
 | Checkout: cálculo do resumo | 5 pedidos (1 item mais barato, 1 item mais caro, 2 itens, 3 itens e os 6 produtos): item total, taxa de 8% e total |
+| Menu lateral | Abrir e fechar; All Items; About abre o site da Sauce Labs na mesma aba; Logout e bloqueio de acesso sem login; Reset App State esvazia o carrinho |
+| Rodapé | Links das redes sociais (endereço e abertura em nova aba), copyright com o ano atual, mesmo rodapé no carrinho |
 
 ## Próximos requisitos (backlog)
 
 - [x] **Ordenação de produtos**: Name (A to Z / Z to A) e Price (low to high / high to low).
 - [x] **Detalhes do produto**: conferir nome, descrição e preço, adicionar e remover a partir dali e voltar.
 - [x] **Cálculo do resumo do pedido**: Item total = soma dos preços; Tax = 8%; Total = item total + tax.
+- [x] **Menu lateral**: abrir/fechar, All Items, About, Logout e Reset App State.
+- [x] **Acesso sem login**: abrir `/inventory.html` direto volta para o login com mensagem de erro.
+- [x] **Rodapé**: links das redes sociais e copyright.
 - [ ] **Usuários com defeitos conhecidos**: já cobertos na ordenação e nos detalhes; falta estender ao carrinho e ao checkout.
 - [ ] **Remover produto do carrinho**: pela lista de produtos e pelo carrinho, com atualização do contador.
 - [ ] **Cancelar o checkout**: Cancel em cada passo e Continue Shopping no carrinho.
-- [ ] **Menu lateral**: Logout, Reset App State (limpa o carrinho), All Items e About (ações já prontas no `HeaderComponent`).
-- [ ] **Acesso sem login**: abrir `/inventory.html` direto deve voltar para o login com mensagem de erro.
 - [ ] **Persistência do carrinho**: itens continuam no carrinho ao navegar e após logout/login.
-- [ ] **Rodapé**: links das redes sociais (ações já prontas no `FooterComponent`).
 - [ ] **Recibo em PDF**: baixar o PDF do pedido e validar itens, comprador, valores e data (atenção: o nome do arquivo usa horário UTC e o conteúdo, o horário local).
 - [ ] **Dynamic Catalog**: páginas Lazy Load, Spinner e Slider.
+
+## Defeitos encontrados (ainda sem teste)
+
+- **Reset App State não atualiza os botões da lista de produtos** (inclusive com o `standard_user`): o carrinho é esvaziado, mas os produtos continuam mostrando "Remove" até a página ser recarregada.
+- **About com o `problem_user`** aponta para `https://saucelabs.com/error/404`, em vez do site da Sauce Labs.
