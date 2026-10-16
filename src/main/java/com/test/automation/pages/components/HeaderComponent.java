@@ -11,7 +11,10 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import com.test.automation.pages.BasePage;
 import com.test.automation.pages.CartPage;
 import com.test.automation.pages.InventoryPage;
+import com.test.automation.pages.LazyLoadPage;
 import com.test.automation.pages.LoginPage;
+import com.test.automation.pages.SliderPage;
+import com.test.automation.pages.SpinnerPage;
 import com.test.automation.utils.Log;
 
 /**
@@ -142,31 +145,28 @@ public class HeaderComponent extends BasePage {
         waitVisible(lazyLoadLink); // espera as opções aparecerem
     }
 
-    /**
-     * Vai para Dynamic Catalog > Lazy Load. Quando a página existir, este método
-     * passa a devolvê-la.
-     */
-    public void goToLazyLoad() {
+    /** Vai para Dynamic Catalog > Lazy Load. */
+    public LazyLoadPage goToLazyLoad() {
         expandDynamicCatalog();
+        Log.info("Clicando em Lazy Load.");
         click(lazyLoadLink);
+        return new LazyLoadPage(driver);
     }
 
-    /**
-     * Vai para Dynamic Catalog > Spinner. Quando a página existir, este método
-     * passa a devolvê-la.
-     */
-    public void goToSpinner() {
+    /** Vai para Dynamic Catalog > Spinner. */
+    public SpinnerPage goToSpinner() {
         expandDynamicCatalog();
+        Log.info("Clicando em Spinner.");
         click(spinnerLink);
+        return new SpinnerPage(driver);
     }
 
-    /**
-     * Vai para Dynamic Catalog > Slider. Quando a página existir, este método passa
-     * a devolvê-la.
-     */
-    public void goToSlider() {
+    /** Vai para Dynamic Catalog > Slider. */
+    public SliderPage goToSlider() {
         expandDynamicCatalog();
+        Log.info("Clicando em Slider.");
         click(sliderLink);
+        return new SliderPage(driver);
     }
 
     /**

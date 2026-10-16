@@ -7,6 +7,7 @@ A aplicação testada é o [Sauce Demo](https://www.saucedemo.com/), uma loja vi
 
 - Testes orientados a dados com **Excel**, **JSON**, dados fixos e parâmetros do XML do TestNG.
 - Testes com **todos os perfis de usuário** do Sauce Demo, inclusive os que têm defeitos de propósito.
+- Páginas **dinâmicas** (Dynamic Catalog): carregamento com spinner, lista infinita com lazy load e slider automático, sempre com espera explícita, nunca `Thread.sleep`.
 - Validação de **arquivo baixado**: o recibo do pedido em PDF é baixado pelo navegador e tem o conteúdo conferido.
 - Relatório HTML (Extent Reports) com prints, logs (Log4j2) e envio do relatório por e-mail.
 - Navegador e modo headless escolhidos por configuração.
@@ -59,6 +60,9 @@ selenium-framework/
 │   │   │   ├── CheckoutInformationPage.java# Checkout passo 1: dados do comprador
 │   │   │   ├── CheckoutOverviewPage.java   # Checkout passo 2: resumo e valores
 │   │   │   ├── CheckoutCompletePage.java   # Confirmação do pedido
+│   │   │   ├── SpinnerPage.java            # Dynamic Catalog: spinner de carregamento
+│   │   │   ├── LazyLoadPage.java           # Dynamic Catalog: lista infinita com lazy load
+│   │   │   ├── SliderPage.java             # Dynamic Catalog: slider automático
 │   │   │   └── components/                 # Partes que se repetem em várias páginas
 │   │   │       ├── HeaderComponent.java    # Menu lateral e ícone do carrinho
 │   │   │       └── FooterComponent.java    # Redes sociais e copyright
@@ -83,7 +87,8 @@ selenium-framework/
 │   │   │   ├── LoginDataProvider.java      # Excel e dados fixos do login
 │   │   │   ├── CheckoutDataProvider.java   # Excel do carrinho e do checkout + JSON do resumo do pedido
 │   │   │   ├── ProductDataProvider.java    # JSON dos cenários de produto
-│   │   │   └── UserDataProvider.java       # Lista de usuários que fazem login
+│   │   │   ├── UserDataProvider.java       # Lista de usuários que fazem login
+│   │   │   └── DynamicCatalogDataProvider.java # Cenários do Lazy Load (dados fixos)
 │   │   └── tests/                          # Uma pasta por módulo/funcionalidade
 │   │       ├── login/
 │   │       │   ├── BaseLoginTest.java      # Validações comuns do login (SUCCESS x ERROR)
@@ -104,9 +109,13 @@ selenium-framework/
 │   │       │   ├── CancelCheckoutTest.java # Cancel em cada passo e Continue Shopping
 │   │       │   ├── OrderSummaryTest.java   # Cálculo do resumo: item total, taxa e total
 │   │       │   └── OrderReceiptPdfTest.java# Recibo em PDF: download e conteúdo
-│   │       └── navigation/                 # Partes presentes em todas as páginas
-│   │           ├── SideMenuTest.java       # Menu lateral: All Items, About, Logout, Reset App State
-│   │           └── FooterTest.java         # Rodapé: redes sociais e copyright
+│   │       ├── navigation/                 # Partes presentes em todas as páginas
+│   │       │   ├── SideMenuTest.java       # Menu lateral: All Items, About, Logout, Reset App State
+│   │       │   └── FooterTest.java         # Rodapé: redes sociais e copyright
+│   │       └── dynamiccatalog/             # Páginas dinâmicas do menu Dynamic Catalog
+│   │           ├── SpinnerTest.java        # Spinner some e os produtos aparecem
+│   │           ├── LazyLoadTest.java       # Lista infinita e cards que só carregam quando aparecem
+│   │           └── SliderTest.java         # Troca automática, pontos e volta ao primeiro
 │   └── test/resources/
 │       ├── config.properties.example       # Modelo de configuração (versionado)
 │       ├── config.properties               # Configuração local com senha (NÃO versionado)
@@ -123,7 +132,8 @@ selenium-framework/
 │           ├── checkout.xml
 │           ├── inventory.xml               # Ordenação e detalhes do produto
 │           ├── product-users.xml           # Detalhes do produto com os outros usuários
-│           └── navigation.xml              # Menu lateral e rodapé
+│           ├── navigation.xml              # Menu lateral e rodapé
+│           └── dynamic-catalog.xml         # Spinner, Lazy Load e Slider
 ├── docs/exemplos-aula/                     # Material de estudo, fora da compilação
 │   └── LoginPageBasica.java                # Page Object com By (antes do PageFactory)
 ├── reports/      # (gerado) relatórios HTML           ┐
@@ -197,7 +207,7 @@ mvn test -Dbrowser=firefox -Dheadless=true -Demail.enabled=false
 
 | Comando | O que roda | Resultado esperado |
 |---|---|---|
-| `mvn test` | Regressão (`regression.xml`): login, carrinho, checkout, cálculo do resumo, recibo em PDF, detalhes do produto, menu lateral e rodapé | tudo passa |
+| `mvn test` | Regressão (`regression.xml`): login, carrinho, checkout, cálculo do resumo, recibo em PDF, detalhes do produto, menu lateral, rodapé e Dynamic Catalog | tudo passa |
 | `mvn test -Dsuite=login` | Só login | tudo passa |
 | `mvn test -Dsuite=login-parameters` | Login com parâmetros do XML | tudo passa |
 | `mvn test -Dsuite=checkout` | Carrinho, checkout, cálculo do resumo e recibo em PDF | tudo passa |
@@ -205,6 +215,7 @@ mvn test -Dbrowser=firefox -Dheadless=true -Demail.enabled=false
 | `mvn test -Dsuite=inventory` | Ordenação (5 usuários) e detalhes do produto (usuário padrão) | 32 execuções, **8 falhas esperadas** |
 | `mvn test -Dsuite=product-users` | Detalhes do produto com os outros usuários | 16 execuções, **10 falhas esperadas** |
 | `mvn test -Dsuite=navigation` | Menu lateral (inclui acesso sem login) e rodapé | tudo passa |
+| `mvn test -Dsuite=dynamic-catalog` | Spinner, Lazy Load e Slider | tudo passa |
 | `mvn clean test` | Limpa o build antes de rodar | |
 
 **A regressão precisa ficar sempre verde**: é ela que roda na CI a cada push. Os testes que expõem os defeitos conhecidos dos usuários especiais ficam em suítes próprias (`inventory`, `product-users`). As falhas delas são esperadas e mostram que os testes encontram os bugs.
@@ -282,6 +293,24 @@ Resultado: 8 cenários em vez de 24, detectando os mesmos defeitos. Por exemplo,
 
 ---
 
+## Dynamic Catalog: como os testes lidam com páginas dinâmicas
+
+As três páginas mudam sozinhas ou com tempo variável. Por isso os testes **esperam uma condição**, e nunca um tempo fixo:
+
+| Página | Comportamento | Como o teste espera |
+|---|---|---|
+| Spinner | Mostra um spinner por um tempo **aleatório** (0,5 a 3 s) e depois os produtos | `waitInvisible` espera o spinner sumir. Um `Thread.sleep(2000)` falharia sempre que o carregamento passasse de 2 s |
+| Lazy Load | Cada card mostra "Loading…" até aparecer na tela; rolar até o fim acrescenta mais 6 cards (lista infinita) | Espera personalizada: `wait.until(d -> quantidade de cards > antes)`. A quantidade inicial depende do tamanho da janela, então o teste não supõe um número fixo |
+| Slider | Troca de produto sozinho a cada 2 s | **Leitura confirmada**: lê o ponto ativo antes e depois do nome e do preço; se mudou no meio, lê de novo |
+
+Detalhes úteis:
+
+- O Lazy Load usa uma lista própria de 22 itens, com tamanhos (`Sauce Labs Fleece Jacket (XS)`), diferente da página de produtos. Os cenários de conteúdo usam análise de valor limite: início, fim do primeiro lote, início do segundo lote, último item e o primeiro depois dele (a lista recomeça).
+- O texto do placeholder usa o caractere de reticências (`…`, escrito `\u2026` no Java), e não três pontos. No DevTools (Console), `elemento.textContent.length` e `charCodeAt()` mostram a diferença.
+- No Spinner e no Slider, a posição do card/ponto é o id do enum `Product`, que fornece os valores esperados.
+
+---
+
 ## Recibo em PDF: como o teste funciona
 
 1. Antes de cada cenário, `DownloadUtils.cleanDownloadDir()` esvazia a pasta `downloads/`. Assim o teste nunca confere um PDF antigo.
@@ -335,6 +364,9 @@ O `config.properties` real não vai para o Git. Na CI, ele é criado a partir do
 | Checkout: recibo em PDF | Os mesmos 5 pedidos: o PDF é baixado e confere nome do arquivo (data e hora), comprador, itens iguais aos da tela, item total, taxa, total e data do pedido |
 | Menu lateral | Abrir e fechar; All Items; About abre o site da Sauce Labs na mesma aba; Logout e bloqueio de acesso sem login; Reset App State esvazia o carrinho |
 | Rodapé | Links das redes sociais (endereço e abertura em nova aba), copyright com o ano atual, mesmo rodapé no carrinho |
+| Dynamic Catalog: Spinner | O spinner aparece e some; os 6 produtos aparecem com nome e preço certos; o carregamento se repete ao recarregar |
+| Dynamic Catalog: Lazy Load | Rolar até o fim carrega mais cards (lotes de 6); card fora da tela mostra "Loading…" e carrega ao aparecer; nome e preço nos limites da lista (posições 0, 5, 6, 21 e 22) |
+| Dynamic Catalog: Slider | Um ponto por produto e só um ativo; troca sozinho para o próximo; cada ponto mostra o produto certo; depois do último volta ao primeiro |
 
 ## Backlog
 
@@ -353,16 +385,18 @@ O `config.properties` real não vai para o Git. Na CI, ele é criado a partir do
 - [x] **Cancelar o checkout**: Cancel em cada passo e Continue Shopping no carrinho.
 - [x] **Persistência do carrinho**: ao navegar, ao recarregar a página e após logout/login.
 - [x] **Recibo em PDF**: baixar o PDF do pedido e validar itens, comprador, valores e data.
+- [x] **Dynamic Catalog**: páginas Spinner, Lazy Load e Slider.
 - [x] **Infraestrutura**: Page Object com componentes, relatório Extent com prints, logs, envio do relatório por e-mail, CI no GitHub Actions e no Jenkins.
 
 ### Pendente
 
-- [ ] **Dynamic Catalog**: páginas Lazy Load, Spinner e Slider.
+- Nenhum requisito pendente. Próximos passos possíveis: testes que confirmem os defeitos encontrados (abaixo).
 
 ## Defeitos encontrados (ainda sem teste)
 
 - **Reset App State não atualiza os botões da lista de produtos** (inclusive com o `standard_user`): o carrinho é esvaziado, mas os produtos continuam mostrando "Remove" até a página ser recarregada.
 - **About com o `problem_user`** aponta para `https://saucelabs.com/error/404`, em vez do site da Sauce Labs.
+- **Item repetido no Lazy Load**: as posições 13 e 14 da lista mostram o mesmo produto, `Test.allTheThings() T-Shirt (Red) (L)`. Os outros produtos aparecem uma vez em cada tamanho.
 
 ### Dúvida de requisito
 

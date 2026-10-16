@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Dynamic Catalog: Spinner, Lazy Load e Slider. Executar: mvn test
+-Dsuite=dynamic-catalog -->
+<suite name="Dynamic Catalog - Sauce Demo" verbose="1">
+    <test name="Dynamic Catalog">
+        <classes>
+            <class name="com.test.automation.tests.dynamiccatalog.SpinnerTest" />
+            <class name="com.test.automation.tests.dynamiccatalog.LazyLoadTest" />
+            <class name="com.test.automation.tests.dynamiccatalog.SliderTest" />
+        </classes>
+    </test>
+</suite>

@@ -29,4 +29,11 @@
             <class name="com.test.automation.tests.navigation.FooterTest" />
         </classes>
     </test>
+    <test name="Dynamic Catalog">
+        <classes>
+            <class name="com.test.automation.tests.dynamiccatalog.SpinnerTest" />
+            <class name="com.test.automation.tests.dynamiccatalog.LazyLoadTest" />
+            <class name="com.test.automation.tests.dynamiccatalog.SliderTest" />
+        </classes>
+    </test>
 </suite>

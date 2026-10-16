@@ -75,6 +75,21 @@ public abstract class BasePage {
         return wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
+    /**
+     * Espera o elemento sumir da tela (ficar invisível ou ser removido).
+     * false se ele continuar visível até o tempo limite.
+     * Uso típico: esperar um spinner de carregamento desaparecer.
+     */
+    public boolean waitInvisible(By locator) {
+        Log.info("Aguardando o elemento sumir: " + locator);
+        try {
+            return wait.until(ExpectedConditions.invisibilityOfElementLocated(locator));
+        } catch (TimeoutException e) {
+            Log.warn("O elemento continuou visível após o tempo de espera: " + locator);
+            return false;
+        }
+    }
+
     // ---------- Ações genéricas ----------
 
     /**
