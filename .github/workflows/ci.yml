@@ -82,7 +82,7 @@ jobs:
 
       - name: Publicar relatório, prints e logs
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: resultados-${{ env.SUITE }}-${{ github.run_number }}
           path: |
