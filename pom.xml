@@ -74,11 +74,18 @@
       <version>2.0.2</version>
     </dependency>
 
-        <!-- Leitura de arquivos JSON -->
+    <!-- Leitura de arquivos JSON -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>2.18.2</version>
+    </dependency>
+
+    <!-- Leitura de arquivos PDF (recibo do pedido) -->
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>3.0.3</version>
     </dependency>
   </dependencies>
 

@@ -12,6 +12,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
 import com.test.automation.config.ConfigReader;
+import com.test.automation.utils.DownloadUtils;
 import com.test.automation.utils.Log;
 
 /**
@@ -22,6 +23,8 @@ import com.test.automation.utils.Log;
  *   browser=chrome | firefox | edge
  *   headless=true  | false
  * Ou numa execução específica: mvn test -Dbrowser=firefox -Dheadless=true
+ *
+ * Os downloads vão direto para a pasta de downloads do projeto (DownloadUtils), sem perguntar.
  */
 public class DriverFactory {
 
@@ -47,15 +50,25 @@ public class DriverFactory {
         return driver;
     }
 
-    private static ChromeOptions chromeOptions(boolean headless) {
-        ChromeOptions options = new ChromeOptions();
-        // Desliga o gerenciador de senhas e o aviso de "senha vazada" do Chrome.
-        // Sem isso, depois do login no Sauce Demo pode aparecer um pop-up que atrapalha os cliques.
+    /** Preferências comuns ao Chrome e ao Edge (os dois usam o mesmo motor, o Chromium). */
+    private static Map<String, Object> chromiumPrefs() {
         Map<String, Object> prefs = new HashMap<>();
+        // Desliga o gerenciador de senhas e o aviso de "senha vazada".
+        // Sem isso, depois do login no Sauce Demo pode aparecer um pop-up que atrapalha os cliques.
         prefs.put("credentials_enable_service", false);
         prefs.put("profile.password_manager_enabled", false);
         prefs.put("profile.password_manager_leak_detection", false);
-        options.setExperimentalOption("prefs", prefs);
+        // Downloads: pasta do projeto, sem perguntar onde salvar
+        prefs.put("download.default_directory", DownloadUtils.getDownloadDir());
+        prefs.put("download.prompt_for_download", false);
+        prefs.put("download.directory_upgrade", true);
+        prefs.put("plugins.always_open_pdf_externally", true); // baixa o PDF em vez de abrir no navegador
+        return prefs;
+    }
+
+    private static ChromeOptions chromeOptions(boolean headless) {
+        ChromeOptions options = new ChromeOptions();
+        options.setExperimentalOption("prefs", chromiumPrefs());
         if (headless) {
             options.addArguments("--headless=new", "--window-size=1920,1080");
         }
@@ -64,6 +77,12 @@ public class DriverFactory {
 
     private static FirefoxOptions firefoxOptions(boolean headless) {
         FirefoxOptions options = new FirefoxOptions();
+        // Downloads: pasta do projeto, sem perguntar onde salvar
+        options.addPreference("browser.download.folderList", 2); // 2 = usar a pasta definida abaixo
+        options.addPreference("browser.download.dir", DownloadUtils.getDownloadDir());
+        options.addPreference("browser.download.useDownloadDir", true);
+        options.addPreference("browser.helperApps.neverAsk.saveToDisk", "application/pdf");
+        options.addPreference("pdfjs.disabled", true); // baixa o PDF em vez de abrir no visualizador
         if (headless) {
             options.addArguments("-headless");
         }
@@ -72,6 +91,7 @@ public class DriverFactory {
 
     private static EdgeOptions edgeOptions(boolean headless) {
         EdgeOptions options = new EdgeOptions();
+        options.setExperimentalOption("prefs", chromiumPrefs());
         if (headless) {
             options.addArguments("--headless=new", "--window-size=1920,1080");
         }

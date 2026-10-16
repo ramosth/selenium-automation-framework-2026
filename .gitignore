@@ -157,6 +157,9 @@ maven-metadata-local.xml
 reports/
 screenshots/
 
+# PDFs baixados pelos testes
+downloads/
+
 ### Visual_studio ###
 # visual_studio editor specific files
 
