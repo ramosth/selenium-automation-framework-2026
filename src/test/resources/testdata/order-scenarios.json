@@ -1,0 +1,49 @@
+[
+  {
+    "testId": "CALC01",
+    "scenario": "Resumo com 1 item, o mais barato",
+    "products": ["Sauce Labs Onesie"],
+    "expectedItemTotal": 7.99,
+    "expectedTax": 0.64,
+    "expectedTotal": 8.63
+  },
+  {
+    "testId": "CALC02",
+    "scenario": "Resumo com 1 item, o mais caro (taxa arredonda para cima)",
+    "products": ["Sauce Labs Fleece Jacket"],
+    "expectedItemTotal": 49.99,
+    "expectedTax": 4.00,
+    "expectedTotal": 53.99
+  },
+  {
+    "testId": "CALC03",
+    "scenario": "Resumo com 2 itens",
+    "products": ["Sauce Labs Backpack", "Sauce Labs Bike Light"],
+    "expectedItemTotal": 39.98,
+    "expectedTax": 3.20,
+    "expectedTotal": 43.18
+  },
+  {
+    "testId": "CALC04",
+    "scenario": "Resumo com 3 itens, dois com o mesmo preço",
+    "products": ["Sauce Labs Bolt T-Shirt", "Test.allTheThings() T-Shirt (Red)", "Sauce Labs Onesie"],
+    "expectedItemTotal": 39.97,
+    "expectedTax": 3.20,
+    "expectedTotal": 43.17
+  },
+  {
+    "testId": "CALC05",
+    "scenario": "Resumo com todos os 6 produtos",
+    "products": [
+      "Sauce Labs Backpack",
+      "Sauce Labs Bike Light",
+      "Sauce Labs Bolt T-Shirt",
+      "Sauce Labs Fleece Jacket",
+      "Sauce Labs Onesie",
+      "Test.allTheThings() T-Shirt (Red)"
+    ],
+    "expectedItemTotal": 129.94,
+    "expectedTax": 10.40,
+    "expectedTotal": 140.34
+  }
+]

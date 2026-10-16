@@ -43,7 +43,8 @@ selenium-framework/
 │   │   │   └── ConfigReader.java           # Lê o config.properties
 │   │   ├── data/                           # Modelos de dados (usados pelas páginas e pelos testes)
 │   │   │   ├── User.java                   # enum com os usuários do Sauce Demo
-│   │   │   └── ProductScenario.java        # record: um cenário do teste de detalhes do produto
+│   │   │   ├── ProductScenario.java        # record: um cenário do teste de detalhes do produto
+│   │   │   └── OrderScenario.java          # record: um cenário do cálculo do resumo do pedido
 │   │   ├── driver/
 │   │   │   └── DriverFactory.java          # Cria o navegador (chrome/firefox/edge, headless)
 │   │   ├── pages/                          # PAGE OBJECTS: uma classe por página
@@ -75,7 +76,7 @@ selenium-framework/
 │   │   │   └── BaseTest.java               # Abre/fecha navegador, relatório e prints
 │   │   ├── dataproviders/                  # De onde vêm os dados de cada módulo
 │   │   │   ├── LoginDataProvider.java      # Excel e dados fixos do login
-│   │   │   ├── CheckoutDataProvider.java   # Excel do carrinho e do checkout
+│   │   │   ├── CheckoutDataProvider.java   # Excel do carrinho e do checkout + JSON do resumo do pedido
 │   │   │   ├── ProductDataProvider.java    # JSON dos cenários de produto
 │   │   │   └── UserDataProvider.java       # Lista de usuários que fazem login
 │   │   └── tests/                          # Uma pasta por módulo/funcionalidade
@@ -92,7 +93,8 @@ selenium-framework/
 │   │       ├── cart/
 │   │       │   └── CartTest.java
 │   │       └── checkout/
-│   │           └── CheckoutTest.java
+│   │           ├── CheckoutTest.java
+│   │           └── OrderSummaryTest.java   # Cálculo do resumo: item total, taxa e total
 │   └── test/resources/
 │       ├── config.properties.example       # Modelo de configuração (versionado)
 │       ├── config.properties               # Configuração local com senha (NÃO versionado)
@@ -100,7 +102,8 @@ selenium-framework/
 │       │   ├── LoginData.xlsx              # aba Login
 │       │   ├── CheckoutData.xlsx           # abas Cart e Checkout
 │       │   ├── product-scenarios.json      # detalhes do produto: usuário padrão
-│       │   └── product-scenarios-users.json# detalhes do produto: outros usuários
+│       │   ├── product-scenarios-users.json# detalhes do produto: outros usuários
+│       │   └── order-scenarios.json        # cálculo do resumo do pedido
 │       └── suites/                         # Suítes do TestNG
 │           ├── regression.xml              # Regressão (padrão do mvn test): deve ficar verde
 │           ├── login.xml
@@ -179,10 +182,10 @@ mvn test -Dbrowser=firefox -Dheadless=true -Demail.enabled=false
 
 | Comando | O que roda | Resultado esperado |
 |---|---|---|
-| `mvn test` | Regressão (`regression.xml`): login, carrinho, checkout e detalhes do produto | tudo passa |
+| `mvn test` | Regressão (`regression.xml`): login, carrinho, checkout, cálculo do resumo e detalhes do produto | tudo passa |
 | `mvn test -Dsuite=login` | Só login | tudo passa |
 | `mvn test -Dsuite=login-parameters` | Login com parâmetros do XML | tudo passa |
-| `mvn test -Dsuite=checkout` | Carrinho e checkout | tudo passa |
+| `mvn test -Dsuite=checkout` | Carrinho, checkout e cálculo do resumo do pedido | tudo passa |
 | `mvn test -Dsuite=inventory` | Ordenação (5 usuários) e detalhes do produto (usuário padrão) | 32 execuções, **8 falhas esperadas** |
 | `mvn test -Dsuite=product-users` | Detalhes do produto com os outros usuários | 16 execuções, **10 falhas esperadas** |
 | `mvn clean test` | Limpa o build antes de rodar | |
@@ -221,7 +224,7 @@ Em todos os formatos, **um cenário por linha, com os valores esperados escritos
 - `expectedResult` = `SUCCESS` ou `ERROR`, com a mensagem esperada em `expectedMessage`.
 - Célula vazia vira texto vazio, o que permite testar campos em branco.
 
-### JSON (detalhes do produto)
+### JSON (detalhes do produto e resumo do pedido)
 
 Cada arquivo é uma lista `[ ]` de cenários `{ }`. O Jackson converte cada cenário num objeto `ProductScenario` (um `record`):
 
@@ -239,6 +242,9 @@ Cada arquivo é uma lista `[ ]` de cenários `{ }`. O Jackson converte cada cen�
 
 - As chaves do JSON têm **os mesmos nomes** dos campos do `ProductScenario`: é assim que o Jackson sabe onde colocar cada valor.
 - O campo `user` usa o nome da constante do enum (`"PROBLEM"`), e o Jackson converte para `User.PROBLEM`.
+- Um campo pode ser uma **lista** de tamanho variável, como os produtos de cada pedido em `order-scenarios.json`:
+  `"products": ["Sauce Labs Backpack", "Sauce Labs Bike Light"]`. É um dos casos em que o JSON é melhor que o Excel,
+  onde a lista viraria texto separado por `;`.
 - Os valores esperados são sempre os **corretos** (o requisito). Se o site errar, o teste falha e mostra o defeito.
 - JSON não aceita comentários: a justificativa da escolha dos cenários fica neste README e nos comentários das classes de teste.
 
@@ -291,14 +297,15 @@ O `config.properties` real não vai para o Git. Na CI, ele é criado a partir do
 | Produtos: detalhes | 6 produtos com o usuário padrão + 8 cenários com os outros usuários: preço na lista, id na URL, nome, descrição, preço e imagem; adicionar e remover pela página de detalhes |
 | Carrinho | Adicionar 1, 2 e todos os produtos (contador e itens no carrinho) |
 | Checkout | Compra concluída e validação dos 3 campos obrigatórios |
+| Checkout: cálculo do resumo | 5 pedidos (1 item mais barato, 1 item mais caro, 2 itens, 3 itens e os 6 produtos): item total, taxa de 8% e total |
 
 ## Próximos requisitos (backlog)
 
 - [x] **Ordenação de produtos**: Name (A to Z / Z to A) e Price (low to high / high to low).
 - [x] **Detalhes do produto**: conferir nome, descrição e preço, adicionar e remover a partir dali e voltar.
+- [x] **Cálculo do resumo do pedido**: Item total = soma dos preços; Tax = 8%; Total = item total + tax.
 - [ ] **Usuários com defeitos conhecidos**: já cobertos na ordenação e nos detalhes; falta estender ao carrinho e ao checkout.
 - [ ] **Remover produto do carrinho**: pela lista de produtos e pelo carrinho, com atualização do contador.
-- [ ] **Cálculo do resumo do pedido**: Item total = soma dos preços; Tax = 8%; Total = item total + tax.
 - [ ] **Cancelar o checkout**: Cancel em cada passo e Continue Shopping no carrinho.
 - [ ] **Menu lateral**: Logout, Reset App State (limpa o carrinho), All Items e About (ações já prontas no `HeaderComponent`).
 - [ ] **Acesso sem login**: abrir `/inventory.html` direto deve voltar para o login com mensagem de erro.
