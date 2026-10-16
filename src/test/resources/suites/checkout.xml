@@ -3,9 +3,12 @@
 <suite name="Carrinho e Checkout - Sauce Demo" verbose="1">
     <test name="Carrinho e Checkout">
         <classes>
-            <!-- <class name="com.test.automation.tests.cart.CartTest" />
-            <class name="com.test.automation.tests.checkout.CheckoutTest" /> -->
+            <class name="com.test.automation.tests.cart.CartTest" />
+            <class name="com.test.automation.tests.checkout.CheckoutTest" />
             <class name="com.test.automation.tests.checkout.OrderSummaryTest" />
+            <class name="com.test.automation.tests.cart.RemoveFromCartTest" />
+            <class name="com.test.automation.tests.cart.CartPersistenceTest" />
+            <class name="com.test.automation.tests.checkout.CancelCheckoutTest" />
         </classes>
     </test>
 </suite>

@@ -92,9 +92,12 @@ selenium-framework/
 │   │       │   ├── ProductDetailsTest.java       # Detalhes com o usuário padrão (regressão)
 │   │       │   └── ProductDetailsUsersTest.java  # Detalhes com os outros usuários (defeitos)
 │   │       ├── cart/
-│   │       │   └── CartTest.java
+│   │       │   ├── CartTest.java
+│   │       │   ├── RemoveFromCartTest.java # Remover pela lista de produtos e pelo carrinho
+│   │       │   └── CartPersistenceTest.java# Carrinho mantido ao navegar, recarregar e após logout/login
 │   │       ├── checkout/
 │   │       │   ├── CheckoutTest.java
+│   │       │   ├── CancelCheckoutTest.java # Cancel em cada passo e Continue Shopping
 │   │       │   └── OrderSummaryTest.java   # Cálculo do resumo: item total, taxa e total
 │   │       └── navigation/                 # Partes presentes em todas as páginas
 │   │           ├── SideMenuTest.java       # Menu lateral: All Items, About, Logout, Reset App State
@@ -303,23 +306,34 @@ O `config.properties` real não vai para o Git. Na CI, ele é criado a partir do
 | Produtos: ordenação | 4 ordenações (padrão A–Z, Z–A, preço crescente e decrescente) × 5 usuários |
 | Produtos: detalhes | 6 produtos com o usuário padrão + 8 cenários com os outros usuários: preço na lista, id na URL, nome, descrição, preço e imagem; adicionar e remover pela página de detalhes |
 | Carrinho | Adicionar 1, 2 e todos os produtos (contador e itens no carrinho) |
+| Carrinho: remover | Pela lista de produtos e pelo carrinho (contador e botão atualizados); remover todos deixa o carrinho vazio |
+| Carrinho: persistência | Carrinho mantido ao navegar entre páginas, ao recarregar a página e após logout e novo login |
 | Checkout | Compra concluída e validação dos 3 campos obrigatórios |
+| Checkout: cancelar | Cancel nos dados do comprador volta ao carrinho; Cancel no resumo e Continue Shopping voltam aos produtos, sem perder o carrinho |
 | Checkout: cálculo do resumo | 5 pedidos (1 item mais barato, 1 item mais caro, 2 itens, 3 itens e os 6 produtos): item total, taxa de 8% e total |
 | Menu lateral | Abrir e fechar; All Items; About abre o site da Sauce Labs na mesma aba; Logout e bloqueio de acesso sem login; Reset App State esvazia o carrinho |
 | Rodapé | Links das redes sociais (endereço e abertura em nova aba), copyright com o ano atual, mesmo rodapé no carrinho |
 
-## Próximos requisitos (backlog)
+## Backlog
 
-- [x] **Ordenação de produtos**: Name (A to Z / Z to A) e Price (low to high / high to low).
-- [x] **Detalhes do produto**: conferir nome, descrição e preço, adicionar e remover a partir dali e voltar.
+### Concluído
+
+- [x] **Login**: usuários válidos, usuário bloqueado e mensagens de erro (dados em Excel, fixos e no XML do TestNG).
+- [x] **Carrinho**: adicionar 1, 2 e todos os produtos.
+- [x] **Checkout**: compra concluída e validação dos campos obrigatórios.
+- [x] **Ordenação de produtos**: Name (A to Z / Z to A) e Price (low to high / high to low), para cada usuário.
+- [x] **Detalhes do produto**: nome, descrição, preço, imagem e id na URL; adicionar e remover a partir dali; cenários com os outros usuários.
 - [x] **Cálculo do resumo do pedido**: Item total = soma dos preços; Tax = 8%; Total = item total + tax.
 - [x] **Menu lateral**: abrir/fechar, All Items, About, Logout e Reset App State.
 - [x] **Acesso sem login**: abrir `/inventory.html` direto volta para o login com mensagem de erro.
 - [x] **Rodapé**: links das redes sociais e copyright.
-- [ ] **Usuários com defeitos conhecidos**: já cobertos na ordenação e nos detalhes; falta estender ao carrinho e ao checkout.
-- [ ] **Remover produto do carrinho**: pela lista de produtos e pelo carrinho, com atualização do contador.
-- [ ] **Cancelar o checkout**: Cancel em cada passo e Continue Shopping no carrinho.
-- [ ] **Persistência do carrinho**: itens continuam no carrinho ao navegar e após logout/login.
+- [x] **Remover produto do carrinho**: pela lista de produtos e pelo carrinho, com atualização do contador.
+- [x] **Cancelar o checkout**: Cancel em cada passo e Continue Shopping no carrinho.
+- [x] **Persistência do carrinho**: ao navegar, ao recarregar a página e após logout/login.
+- [x] **Infraestrutura**: Page Object com componentes, relatório Extent com prints, logs, envio do relatório por e-mail, CI no GitHub Actions e no Jenkins.
+
+### Pendente
+
 - [ ] **Recibo em PDF**: baixar o PDF do pedido e validar itens, comprador, valores e data (atenção: o nome do arquivo usa horário UTC e o conteúdo, o horário local).
 - [ ] **Dynamic Catalog**: páginas Lazy Load, Spinner e Slider.
 
@@ -327,3 +341,7 @@ O `config.properties` real não vai para o Git. Na CI, ele é criado a partir do
 
 - **Reset App State não atualiza os botões da lista de produtos** (inclusive com o `standard_user`): o carrinho é esvaziado, mas os produtos continuam mostrando "Remove" até a página ser recarregada.
 - **About com o `problem_user`** aponta para `https://saucelabs.com/error/404`, em vez do site da Sauce Labs.
+
+### Dúvida de requisito
+
+- **O carrinho continua após o logout**, porque fica guardado no navegador e não na conta do usuário. Se outra pessoa entrar com **outro usuário** no mesmo navegador, verá o carrinho de quem saiu. O teste PER03 protege o comportamento atual, mas vale confirmar com o time se o carrinho deveria ser por usuário.

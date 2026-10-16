@@ -188,6 +188,12 @@ public abstract class BasePage {
         return driver.getWindowHandles().size();
     }
 
+    /** Recarrega a página atual (equivalente ao F5). */
+    public void refreshPage() {
+        Log.info("Recarregando a página.");
+        driver.navigate().refresh();
+    }
+
     /**
      * Rola a página até o elemento ficar no centro da tela (útil para o print
      * mostrar o elemento).

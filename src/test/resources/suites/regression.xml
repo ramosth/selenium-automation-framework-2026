@@ -12,6 +12,9 @@
             <class name="com.test.automation.tests.cart.CartTest" />
             <class name="com.test.automation.tests.checkout.CheckoutTest" />
             <class name="com.test.automation.tests.checkout.OrderSummaryTest" />
+            <class name="com.test.automation.tests.cart.RemoveFromCartTest" />
+            <class name="com.test.automation.tests.cart.CartPersistenceTest" />
+            <class name="com.test.automation.tests.checkout.CancelCheckoutTest" />
         </classes>
     </test>
     <test name="Produtos">

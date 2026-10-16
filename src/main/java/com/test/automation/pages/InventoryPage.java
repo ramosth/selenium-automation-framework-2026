@@ -50,7 +50,10 @@ public class InventoryPage extends BasePage {
 
     // ---------- Localizadores dinâmicos (dependem do nome do produto) ----------
 
-    /** XPath do card do produto com o nome informado. Base para os localizadores abaixo. */
+    /**
+     * XPath do card do produto com o nome informado. Base para os localizadores
+     * abaixo.
+     */
     private String productCard(String productName) {
         return "//div[@data-test='inventory-item'][.//div[@data-test='inventory-item-name' and normalize-space()='"
                 + productName + "']]";
@@ -97,6 +100,11 @@ public class InventoryPage extends BasePage {
     /** Opção de ordenação selecionada no momento (ex.: "Name (A to Z)"). */
     public String getSelectedSort() {
         return new Select(sortDropdownElement).getFirstSelectedOption().getText();
+    }
+
+    /** true se o produto está no carrinho (o botão do card mostra "Remove"). */
+    public boolean isProductInCart(String productName) {
+        return waitVisible(productButton(productName)).getText().equalsIgnoreCase("Remove");
     }
 
     // ---------- AÇÕES ----------
