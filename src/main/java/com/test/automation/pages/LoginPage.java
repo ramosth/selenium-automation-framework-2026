@@ -6,6 +6,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
 import com.test.automation.config.ConfigReader;
+import com.test.automation.data.User;
 import com.test.automation.utils.Log;
 
 /**
@@ -25,7 +26,8 @@ public class LoginPage extends BasePage {
     @FindBy(css = "[data-test='error']")
     private WebElement errorMessageElement;
 
-    // Sempre que um objeto desta página é criado, o teste precisa passar o WebDriver.
+    // Sempre que um objeto desta página é criado, o teste precisa passar o
+    // WebDriver.
     // O construtor da BasePage cuida do WebDriverWait e do PageFactory.
     public LoginPage(WebDriver driver) {
         super(driver);
@@ -53,13 +55,22 @@ public class LoginPage extends BasePage {
     }
 
     /**
-     * Login com o usuário padrão do config.properties (standard.username / standard.password).
-     * Usado como pré-condição pelos testes de carrinho e checkout. Devolve a página de produtos.
+     * Login com um dos usuários do Sauce Demo e devolve a página de produtos.
+     * Atenção: com User.LOCKED_OUT o login é bloqueado e a página de produtos não
+     * abre.
+     */
+    public InventoryPage loginAs(User user) {
+        Log.info("Login como " + user.getUsername() + " (" + user.getDescription() + ")");
+        login(user.getUsername(), ConfigReader.get("standard.password", "secret_sauce"));
+        return new InventoryPage(driver);
+    }
+
+    /**
+     * Atalho para o usuário padrão. Usado como pré-condição nos testes de carrinho
+     * e checkout.
      */
     public InventoryPage loginAsStandardUser() {
-        login(ConfigReader.get("standard.username", "standard_user"),
-                ConfigReader.get("standard.password", "secret_sauce"));
-        return new InventoryPage(driver);
+        return loginAs(User.STANDARD);
     }
 
     // Login bem-sucedido = o título "Products" aparece após o login

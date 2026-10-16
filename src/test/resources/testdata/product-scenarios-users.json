@@ -1,0 +1,74 @@
+[
+  {
+    "testId": "PD07",
+    "scenario": "problem_user abre o primeiro produto (id 0)",
+    "user": "PROBLEM",
+    "productName": "Sauce Labs Bike Light",
+    "expectedId": 0,
+    "expectedPrice": 9.99,
+    "expectedDescription": "A red light isn't the desired state in testing but it sure helps when riding your bike at night. Water-resistant with 3 lighting modes, 1 AAA battery included."
+  },
+  {
+    "testId": "PD08",
+    "scenario": "problem_user abre o último produto (id 5)",
+    "user": "PROBLEM",
+    "productName": "Sauce Labs Fleece Jacket",
+    "expectedId": 5,
+    "expectedPrice": 49.99,
+    "expectedDescription": "It's not every day that you come across a midweight quarter-zip fleece jacket capable of handling everything from a relaxing day outdoors to a busy day at the office."
+  },
+  {
+    "testId": "PD09",
+    "scenario": "error_user abre o primeiro produto (id 0)",
+    "user": "ERROR",
+    "productName": "Sauce Labs Bike Light",
+    "expectedId": 0,
+    "expectedPrice": 9.99,
+    "expectedDescription": "A red light isn't the desired state in testing but it sure helps when riding your bike at night. Water-resistant with 3 lighting modes, 1 AAA battery included."
+  },
+  {
+    "testId": "PD10",
+    "scenario": "error_user abre o último produto (id 5)",
+    "user": "ERROR",
+    "productName": "Sauce Labs Fleece Jacket",
+    "expectedId": 5,
+    "expectedPrice": 49.99,
+    "expectedDescription": "It's not every day that you come across a midweight quarter-zip fleece jacket capable of handling everything from a relaxing day outdoors to a busy day at the office."
+  },
+  {
+    "testId": "PD11",
+    "scenario": "visual_user abre o primeiro produto (id 0)",
+    "user": "VISUAL",
+    "productName": "Sauce Labs Bike Light",
+    "expectedId": 0,
+    "expectedPrice": 9.99,
+    "expectedDescription": "A red light isn't the desired state in testing but it sure helps when riding your bike at night. Water-resistant with 3 lighting modes, 1 AAA battery included."
+  },
+  {
+    "testId": "PD12",
+    "scenario": "visual_user abre o último produto (id 5)",
+    "user": "VISUAL",
+    "productName": "Sauce Labs Fleece Jacket",
+    "expectedId": 5,
+    "expectedPrice": 49.99,
+    "expectedDescription": "It's not every day that you come across a midweight quarter-zip fleece jacket capable of handling everything from a relaxing day outdoors to a busy day at the office."
+  },
+  {
+    "testId": "PD13",
+    "scenario": "performance_glitch_user abre o primeiro produto (id 0)",
+    "user": "PERFORMANCE_GLITCH",
+    "productName": "Sauce Labs Bike Light",
+    "expectedId": 0,
+    "expectedPrice": 9.99,
+    "expectedDescription": "A red light isn't the desired state in testing but it sure helps when riding your bike at night. Water-resistant with 3 lighting modes, 1 AAA battery included."
+  },
+  {
+    "testId": "PD14",
+    "scenario": "performance_glitch_user abre o último produto (id 5)",
+    "user": "PERFORMANCE_GLITCH",
+    "productName": "Sauce Labs Fleece Jacket",
+    "expectedId": 5,
+    "expectedPrice": 49.99,
+    "expectedDescription": "It's not every day that you come across a midweight quarter-zip fleece jacket capable of handling everything from a relaxing day outdoors to a busy day at the office."
+  }
+]

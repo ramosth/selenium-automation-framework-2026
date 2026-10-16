@@ -1,0 +1,10 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Módulo de produtos. Executar: mvn test -Dsuite=inventory -->
+<suite name="Produtos - Sauce Demo" verbose="1">
+    <test name="Produtos">
+        <classes>
+            <class name="com.test.automation.tests.inventory.ProductSortTest" />
+            <class name="com.test.automation.tests.inventory.ProductDetailsTest" />
+        </classes>
+    </test>
+</suite>

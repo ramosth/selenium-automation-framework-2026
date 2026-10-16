@@ -27,7 +27,7 @@ pipeline {
 
     // Opções exibidas em "Construir com parâmetros"
     parameters {
-        choice(name: 'SUITE', choices: ['regression', 'login', 'checkout', 'login-parameters'],
+        choice(name: 'SUITE', choices: ['regression', 'login', 'checkout', 'login-parameters', 'inventory', 'product-users'],
                description: 'Suíte do TestNG (src/test/resources/suites)')
         choice(name: 'BROWSER', choices: ['chrome', 'firefox', 'edge'],
                description: 'Navegador')

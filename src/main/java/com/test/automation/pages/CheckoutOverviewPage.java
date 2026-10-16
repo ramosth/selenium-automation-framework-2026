@@ -18,28 +18,22 @@ public class CheckoutOverviewPage extends BasePage {
     public static final String TITLE = "Checkout: Overview";
 
     @FindBy(css = "[data-test='cart-quantity-label']")
-    private WebElement cartQuantityLabelElements;
+    private WebElement quantityLabelElement;
 
     @FindBy(css = "[data-test='cart-desc-label']")
-    private WebElement cartDescLabelElements;
+    private WebElement descriptionLabelElement;
 
     @FindBy(css = "[data-test='inventory-item-name']")
     private List<WebElement> itemNameElements;
 
-    @FindBy(css = "[data-test='payment-info-label']")
-    private WebElement paymentInfoLabelElement;
+    @FindBy(css = "[data-test='inventory-item-price']")
+    private List<WebElement> itemPriceElements;
 
     @FindBy(css = "[data-test='payment-info-value']")
     private WebElement paymentInfoValueElement;
 
-    @FindBy(css = "[data-test='shipping-info-label']")
-    private WebElement shippingInfoLabelElement;
-
     @FindBy(css = "[data-test='shipping-info-value']")
     private WebElement shippingInfoValueElement;
-
-    @FindBy(css = "[data-test='total-info-label']")
-    private WebElement totalInfoLabelElement;
 
     @FindBy(css = "[data-test='subtotal-label']")
     private WebElement subtotalLabelElement;
@@ -50,7 +44,7 @@ public class CheckoutOverviewPage extends BasePage {
     @FindBy(css = "[data-test='total-label']")
     private WebElement totalLabelElement;
 
-    @FindBy(css = "[data-test='finish']")
+    @FindBy(id = "finish")
     private WebElement finishButtonElement;
 
     @FindBy(id = "cancel")
@@ -60,49 +54,59 @@ public class CheckoutOverviewPage extends BasePage {
         super(driver);
     }
 
-    /**
-     * Retorna o componente de cabeçalho da página.
-     */
+    /** Retorna o componente de cabeçalho da página. */
     public HeaderComponent header() {
         return new HeaderComponent(driver);
     }
 
-    /**
-     * Retorna o componente de rodapé da página.
-     */
+    /** Retorna o componente de rodapé da página. */
     public FooterComponent footer() {
         return new FooterComponent(driver);
     }
+
+    // ---------- PERGUNTAS ----------
 
     public boolean isLoaded() {
         return hasTitle(TITLE);
     }
 
-    public String getCartQuantityLabel() {
-        return getText(cartQuantityLabelElements);
+    /** Cabeçalho da coluna de quantidade: "QTY". */
+    public String getQuantityLabel() {
+        return getText(quantityLabelElement);
     }
 
-    public String getCartDescLabel() {
-        return getText(cartDescLabelElements);
+    /** Cabeçalho da coluna de descrição: "Description". */
+    public String getDescriptionLabel() {
+        return getText(descriptionLabelElement);
     }
 
+    /** Nomes dos itens do pedido. */
     public List<String> getItemNames() {
         return getTexts(itemNameElements);
     }
 
+    /**
+     * Preços dos itens do pedido ("$29.99" -> 29.99). Base para conferir o Item
+     * total.
+     */
+    public List<Double> getItemPrices() {
+        return itemPriceElements.stream()
+                .map(priceElement -> extractValue(priceElement.getText()))
+                .toList();
+    }
+
+    /** Forma de pagamento (ex.: "SauceCard #31337"). */
     public String getPaymentInformation() {
-        waitVisible(paymentInfoLabelElement);
         return getText(paymentInfoValueElement);
     }
-    
+
+    /** Forma de entrega (ex.: "Free Pony Express Delivery!"). */
     public String getShippingInformation() {
-        waitVisible(shippingInfoLabelElement);
         return getText(shippingInfoValueElement);
     }
-    
+
     /** "Item total: $29.99" -> 29.99 */
     public double getItemTotal() {
-        waitVisible(totalInfoLabelElement);
         return extractValue(getText(subtotalLabelElement));
     }
 
@@ -116,12 +120,15 @@ public class CheckoutOverviewPage extends BasePage {
         return extractValue(getText(totalLabelElement));
     }
 
+    // ---------- AÇÕES ----------
+
     public CheckoutCompletePage finish() {
         Log.info("Finalizando o pedido.");
         click(finishButtonElement);
         return new CheckoutCompletePage(driver);
     }
 
+    /** Cancela o pedido nesta etapa e volta para a lista de produtos. */
     public InventoryPage cancel() {
         Log.info("Cancelando o pedido.");
         click(cancelButtonElement);

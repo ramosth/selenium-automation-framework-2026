@@ -3,7 +3,7 @@
 <suite name="Regressão - Sauce Demo" verbose="1">
     <test name="Login">
         <classes>
-            <!-- <class name="com.test.automation.tests.login.LoginTest" /> -->
+            <class name="com.test.automation.tests.login.LoginTest" />
             <class name="com.test.automation.tests.login.LoginTestData" />
         </classes>
     </test>
@@ -11,6 +11,11 @@
         <classes>
             <class name="com.test.automation.tests.cart.CartTest" />
             <class name="com.test.automation.tests.checkout.CheckoutTest" />
+        </classes>
+    </test>
+    <test name="Produtos">
+        <classes>
+            <class name="com.test.automation.tests.inventory.ProductDetailsTest" />
         </classes>
     </test>
 </suite>

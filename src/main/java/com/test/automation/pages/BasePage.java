@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
@@ -152,6 +153,25 @@ public abstract class BasePage {
         } catch (TimeoutException e) {
             Log.warn("URL com '" + expectedUrl + "' não apareceu dentro do tempo de espera.");
             return false;
+        }
+    }
+
+    /**
+     * Se houver um alerta do navegador aberto, lê o texto, clica em OK e devolve o
+     * texto.
+     * Se não houver alerta, devolve null. Espera no máximo 2 segundos para não
+     * atrasar os testes.
+     */
+    public String acceptAlertIfPresent() {
+        try {
+            Alert alert = new WebDriverWait(driver, Duration.ofSeconds(2))
+                    .until(ExpectedConditions.alertIsPresent());
+            String text = alert.getText();
+            alert.accept();
+            Log.warn("Alerta do navegador fechado: " + text);
+            return text;
+        } catch (TimeoutException e) {
+            return null;
         }
     }
 

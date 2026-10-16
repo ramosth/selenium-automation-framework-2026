@@ -1,5 +1,6 @@
 package com.test.automation.pages;
 
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -57,10 +58,15 @@ public class ProductDetailsPage extends BasePage {
 
     /**
      * Verificar a url da página e o botão de voltar aos produtos, pois a página não
-     * tem o título definido
+     * tem o título definido. Espera o botão aparecer (a URL muda antes de a página
+     * terminar de ser desenhada); false se não aparecer no tempo limite.
      */
     public boolean isLoaded() {
-        return hasPageUrl(URL) && isDisplayed(backToProductsButtonElement);
+        try {
+            return hasPageUrl(URL) && waitVisible(backToProductsButtonElement).isDisplayed();
+        } catch (TimeoutException e) {
+            return false;
+        }
     }
 
     /**
@@ -92,6 +98,12 @@ public class ProductDetailsPage extends BasePage {
     /** Botão "Remove" está visível */
     public boolean isRemoveButtonVisible() {
         return isDisplayed(removeButtonElement);
+    }
+
+    /** Id do produto na URL (inventory-item.html?id=4 -> 4). */
+    public int getProductIdFromUrl() {
+        String url = driver.getCurrentUrl();
+        return Integer.parseInt(url.substring(url.indexOf("id=") + 3));
     }
 
     /** AÇÕES */

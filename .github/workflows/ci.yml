@@ -27,7 +27,7 @@ on:
       suite:
         description: "Suíte do TestNG (src/test/resources/suites)"
         type: choice
-        options: [regression, login, checkout, login-parameters]
+        options: [regression, login, checkout, login-parameters, inventory, product-users]
         default: regression
       browser:
         description: "Navegador"

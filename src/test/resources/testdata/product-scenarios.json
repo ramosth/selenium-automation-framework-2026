@@ -1,0 +1,56 @@
+[
+  {
+    "testId": "PD01",
+    "scenario": "Detalhes da Sauce Labs Backpack (usuário padrão)",
+    "user": "STANDARD",
+    "productName": "Sauce Labs Backpack",
+    "expectedId": 4,
+    "expectedPrice": 29.99,
+    "expectedDescription": "carry.allTheThings() with the sleek, streamlined Sly Pack that melds uncompromising style with unequaled laptop and tablet protection."
+  },
+  {
+    "testId": "PD02",
+    "scenario": "Detalhes da Sauce Labs Bike Light (usuário padrão)",
+    "user": "STANDARD",
+    "productName": "Sauce Labs Bike Light",
+    "expectedId": 0,
+    "expectedPrice": 9.99,
+    "expectedDescription": "A red light isn't the desired state in testing but it sure helps when riding your bike at night. Water-resistant with 3 lighting modes, 1 AAA battery included."
+  },
+  {
+    "testId": "PD03",
+    "scenario": "Detalhes da Sauce Labs Bolt T-Shirt (usuário padrão)",
+    "user": "STANDARD",
+    "productName": "Sauce Labs Bolt T-Shirt",
+    "expectedId": 1,
+    "expectedPrice": 15.99,
+    "expectedDescription": "Get your testing superhero on with the Sauce Labs bolt T-shirt. From American Apparel, 100% ringspun combed cotton, heather gray with red bolt."
+  },
+  {
+    "testId": "PD04",
+    "scenario": "Detalhes da Sauce Labs Fleece Jacket (usuário padrão)",
+    "user": "STANDARD",
+    "productName": "Sauce Labs Fleece Jacket",
+    "expectedId": 5,
+    "expectedPrice": 49.99,
+    "expectedDescription": "It's not every day that you come across a midweight quarter-zip fleece jacket capable of handling everything from a relaxing day outdoors to a busy day at the office."
+  },
+  {
+    "testId": "PD05",
+    "scenario": "Detalhes da Sauce Labs Onesie (usuário padrão)",
+    "user": "STANDARD",
+    "productName": "Sauce Labs Onesie",
+    "expectedId": 2,
+    "expectedPrice": 7.99,
+    "expectedDescription": "Rib snap infant onesie for the junior automation engineer in development. Reinforced 3-snap bottom closure, two-needle hemmed sleeved and bottom won't unravel."
+  },
+  {
+    "testId": "PD06",
+    "scenario": "Detalhes da Test.allTheThings() T-Shirt (Red) (usuário padrão)",
+    "user": "STANDARD",
+    "productName": "Test.allTheThings() T-Shirt (Red)",
+    "expectedId": 3,
+    "expectedPrice": 15.99,
+    "expectedDescription": "This classic Sauce Labs t-shirt is perfect to wear when cozying up to your keyboard to automate a few tests. Super-soft and comfy ringspun combed cotton."
+  }
+]

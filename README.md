@@ -3,7 +3,13 @@
 Framework de automação de testes web em **Java + Selenium WebDriver + TestNG**, seguindo o padrão **Page Object Model (POM)**.
 A aplicação testada é o [Sauce Demo](https://www.saucedemo.com/), uma loja virtual de demonstração.
 
-**Recursos:** testes orientados a dados (Excel, dados fixos e parâmetros do XML), relatório HTML (Extent Reports) com prints, logs (Log4j2), envio do relatório por e-mail e escolha do navegador por configuração.
+**Recursos:**
+
+- Testes orientados a dados com **Excel**, **JSON**, dados fixos e parâmetros do XML do TestNG.
+- Testes com **todos os perfis de usuário** do Sauce Demo, inclusive os que têm defeitos de propósito.
+- Relatório HTML (Extent Reports) com prints, logs (Log4j2) e envio do relatório por e-mail.
+- Navegador e modo headless escolhidos por configuração.
+- Integração contínua com **GitHub Actions** e **Jenkins**.
 
 ---
 
@@ -15,9 +21,11 @@ A aplicação testada é o [Sauce Demo](https://www.saucedemo.com/), uma loja vi
 | Selenium WebDriver 4 | Controla o navegador |
 | TestNG | Organiza e executa os testes (anotações, DataProvider, suítes, listeners) |
 | Apache POI | Lê os dados de teste das planilhas Excel |
+| Jackson | Lê os dados de teste dos arquivos JSON |
 | Extent Reports | Gera o relatório HTML da execução |
 | Log4j2 | Gera os logs no console e em arquivo |
 | Jakarta Mail | Envia o relatório por e-mail |
+| GitHub Actions / Jenkins | Executam os testes automaticamente (CI) |
 
 ---
 
@@ -27,26 +35,36 @@ A aplicação testada é o [Sauce Demo](https://www.saucedemo.com/), uma loja vi
 selenium-framework/
 ├── pom.xml                          # Dependências e configuração do Maven/Surefire
 ├── README.md
+├── Jenkinsfile                      # Pipeline do Jenkins
+├── .github/workflows/ci.yml         # Pipeline do GitHub Actions
 ├── src/
 │   ├── main/java/com/test/automation/      # FRAMEWORK: código reutilizável, sem testes
 │   │   ├── config/
 │   │   │   └── ConfigReader.java           # Lê o config.properties
+│   │   ├── data/                           # Modelos de dados (usados pelas páginas e pelos testes)
+│   │   │   ├── User.java                   # enum com os usuários do Sauce Demo
+│   │   │   └── ProductScenario.java        # record: um cenário do teste de detalhes do produto
 │   │   ├── driver/
 │   │   │   └── DriverFactory.java          # Cria o navegador (chrome/firefox/edge, headless)
 │   │   ├── pages/                          # PAGE OBJECTS: uma classe por página
-│   │   │   ├── BasePage.java               # Base de todas as páginas: waits e ações comuns
+│   │   │   ├── BasePage.java               # Base de todas as páginas: esperas e ações comuns
 │   │   │   ├── LoginPage.java
-│   │   │   ├── InventoryPage.java          # Lista de produtos
+│   │   │   ├── InventoryPage.java          # Lista de produtos e ordenação
+│   │   │   ├── ProductDetailsPage.java     # Detalhes de um produto
 │   │   │   ├── CartPage.java               # Carrinho
 │   │   │   ├── CheckoutInformationPage.java# Checkout passo 1: dados do comprador
 │   │   │   ├── CheckoutOverviewPage.java   # Checkout passo 2: resumo e valores
-│   │   │   └── CheckoutCompletePage.java   # Confirmação do pedido
+│   │   │   ├── CheckoutCompletePage.java   # Confirmação do pedido
+│   │   │   └── components/                 # Partes que se repetem em várias páginas
+│   │   │       ├── HeaderComponent.java    # Menu lateral e ícone do carrinho
+│   │   │       └── FooterComponent.java    # Redes sociais e copyright
 │   │   ├── reports/
 │   │   │   └── ExtentReportManager.java    # Cria o relatório HTML
 │   │   ├── listeners/
 │   │   │   └── EmailReportListener.java    # Envia o relatório por e-mail ao fim da suíte
 │   │   └── utils/                          # Utilitários genéricos
 │   │       ├── ExcelUtils.java             # Leitura das planilhas
+│   │       ├── JsonUtils.java              # Leitura dos arquivos JSON
 │   │       ├── EmailUtils.java             # Envio de e-mail (SMTP)
 │   │       ├── ScreenshotUtils.java        # Captura de tela
 │   │       └── Log.java                    # Atalho para o Log4j2
@@ -56,14 +74,21 @@ selenium-framework/
 │   │   ├── base/
 │   │   │   └── BaseTest.java               # Abre/fecha navegador, relatório e prints
 │   │   ├── dataproviders/                  # De onde vêm os dados de cada módulo
-│   │   │   ├── LoginDataProvider.java
-│   │   │   └── CheckoutDataProvider.java
+│   │   │   ├── LoginDataProvider.java      # Excel e dados fixos do login
+│   │   │   ├── CheckoutDataProvider.java   # Excel do carrinho e do checkout
+│   │   │   ├── ProductDataProvider.java    # JSON dos cenários de produto
+│   │   │   └── UserDataProvider.java       # Lista de usuários que fazem login
 │   │   └── tests/                          # Uma pasta por módulo/funcionalidade
 │   │       ├── login/
-│   │       │   ├── BaseLoginTest.java      # Validações comuns do login (if/else SUCCESS x ERROR)
+│   │       │   ├── BaseLoginTest.java      # Validações comuns do login (SUCCESS x ERROR)
 │   │       │   ├── LoginTest.java          # Um método por cenário (aula 1)
 │   │       │   ├── LoginTestData.java      # Data-driven: Excel ou dados fixos
 │   │       │   └── LoginTestParameters.java# Dados vindos do XML do TestNG
+│   │       ├── inventory/
+│   │       │   ├── ProductSortTest.java          # Ordenação, para cada usuário
+│   │       │   ├── BaseProductDetailsTest.java   # Validações comuns dos detalhes do produto
+│   │       │   ├── ProductDetailsTest.java       # Detalhes com o usuário padrão (regressão)
+│   │       │   └── ProductDetailsUsersTest.java  # Detalhes com os outros usuários (defeitos)
 │   │       ├── cart/
 │   │       │   └── CartTest.java
 │   │       └── checkout/
@@ -71,14 +96,18 @@ selenium-framework/
 │   └── test/resources/
 │       ├── config.properties.example       # Modelo de configuração (versionado)
 │       ├── config.properties               # Configuração local com senha (NÃO versionado)
-│       ├── testdata/                       # Massa de dados: um Excel por módulo
+│       ├── testdata/                       # Massa de dados
 │       │   ├── LoginData.xlsx              # aba Login
-│       │   └── CheckoutData.xlsx           # abas Cart e Checkout
+│       │   ├── CheckoutData.xlsx           # abas Cart e Checkout
+│       │   ├── product-scenarios.json      # detalhes do produto: usuário padrão
+│       │   └── product-scenarios-users.json# detalhes do produto: outros usuários
 │       └── suites/                         # Suítes do TestNG
-│           ├── regression.xml              # Tudo (padrão do mvn test)
+│           ├── regression.xml              # Regressão (padrão do mvn test): deve ficar verde
 │           ├── login.xml
+│           ├── login-parameters.xml        # Login com parâmetros no próprio XML
 │           ├── checkout.xml
-│           └── login-parameters.xml        # Login com parâmetros no próprio XML
+│           ├── inventory.xml               # Ordenação e detalhes do produto
+│           └── product-users.xml           # Detalhes do produto com os outros usuários
 ├── docs/exemplos-aula/                     # Material de estudo, fora da compilação
 │   └── LoginPageBasica.java                # Page Object com By (antes do PageFactory)
 ├── reports/      # (gerado) relatórios HTML           ┐
@@ -89,8 +118,10 @@ selenium-framework/
 
 ### Por que `main` e `test`?
 
-- **`src/main`** guarda o **framework**: o que é reutilizável e não é teste (páginas, navegador, utilitários, relatório).
-- **`src/test`** guarda os **testes** e tudo o que só existe para eles (classe base de teste, dados, suítes, configuração).
+- **`src/main`** guarda o **framework**: o que é reutilizável e não é teste (páginas, navegador, utilitários, relatório, modelos de dados).
+- **`src/test`** guarda os **testes** e tudo o que só existe para eles (classe base de teste, DataProviders, massa de dados, suítes, configuração).
+
+O Maven compila o `src/main` **primeiro e sozinho**: ele não enxerga nada do `src/test`. Já o `src/test` enxerga tudo do `src/main`. Por isso, se uma classe de `src/main` precisa de algo (a `LoginPage` usa o `User`), esse algo também tem que estar em `src/main`.
 
 ### As camadas do Page Object
 
@@ -100,10 +131,34 @@ Teste (tests/)  ──usa──▶  Página (pages/)  ──usa──▶  Seleni
    Asserts                  locators + ações
 ```
 
-- A **página** sabe *como* interagir: localizadores (`@FindBy`) e ações (`login`, `addProductToCart`). **Nunca faz Assert.**
+- A **página** sabe *como* interagir: localizadores (`@FindBy`) e ações (`login`, `addProductToCart`). **Nunca faz Assert.** Ela executa ações e responde perguntas (true/false, textos, listas).
 - O **teste** diz *o que* validar: monta o cenário chamando as páginas e decide se passou com `Assert`.
 - Se um botão mudar no site, só a página muda. Os testes continuam iguais.
-- Ações que levam a outra página devolvem essa página (ex.: `cartPage.goToCheckout()` devolve `CheckoutInformationPage`), deixando o fluxo legível.
+- Ações que levam a outra página devolvem essa página (ex.: `cartPage.goToCheckout()` devolve `CheckoutInformationPage`).
+- Partes que se repetem em várias telas são **componentes** (`HeaderComponent`, `FooterComponent`). Cada página os oferece por `header()` e `footer()`: `inventoryPage.header().openCart()`.
+
+**Escolha dos localizadores**, nesta ordem: `id` → `name` → `data-test` → classe estável → XPath relativo. Nunca XPath absoluto nem por posição.
+
+**`@FindBy` ou `By`?** Elemento que **sempre existe** na página (mesmo escondido) usa `@FindBy`. Elemento que é **criado e removido** conforme a tela (contador do carrinho, submenu, mensagem de erro) usa `By` com `driver.findElements(...)`, que devolve uma lista vazia em vez de erro.
+
+**Para saber se uma página carregou, use sempre um método que espera** (`waitVisible`, `hasTitle`, `hasPageUrl`). O `isDisplayed()` sem espera responde na hora e gera testes instáveis quando a página ainda está sendo desenhada.
+
+---
+
+## Usuários do Sauce Demo
+
+Todos usam a senha `secret_sauce` e estão no enum `User`. Exceto o padrão, cada um tem **defeitos de propósito**, para treinar a detecção de bugs:
+
+| Usuário | Constante | Comportamento |
+|---|---|---|
+| `standard_user` | `User.STANDARD` | sem defeitos |
+| `locked_out_user` | `User.LOCKED_OUT` | bloqueado: não consegue fazer login |
+| `problem_user` | `User.PROBLEM` | ordenação não funciona; o clique abre o produto seguinte; falhas no carrinho |
+| `performance_glitch_user` | `User.PERFORMANCE_GLITCH` | funciona, mas com ~5 segundos de lentidão na lista de produtos |
+| `error_user` | `User.ERROR` | ordenação abre um alerta; descrição do produto não carrega; erros no carrinho |
+| `visual_user` | `User.VISUAL` | preços exibidos aleatórios na lista; layout desalinhado |
+
+Uso: `new LoginPage(driver).loginAs(User.PROBLEM)`.
 
 ---
 
@@ -122,13 +177,17 @@ mvn test -Dbrowser=firefox -Dheadless=true -Demail.enabled=false
 
 ## Como executar
 
-| Comando | O que roda |
-|---|---|
-| `mvn test` | Suíte completa (`regression.xml`) |
-| `mvn test -Dsuite=login` | Só login |
-| `mvn test -Dsuite=checkout` | Carrinho e checkout |
-| `mvn test -Dsuite=login-parameters` | Login com parâmetros do XML |
-| `mvn clean test` | Limpa o build antes de rodar |
+| Comando | O que roda | Resultado esperado |
+|---|---|---|
+| `mvn test` | Regressão (`regression.xml`): login, carrinho, checkout e detalhes do produto | tudo passa |
+| `mvn test -Dsuite=login` | Só login | tudo passa |
+| `mvn test -Dsuite=login-parameters` | Login com parâmetros do XML | tudo passa |
+| `mvn test -Dsuite=checkout` | Carrinho e checkout | tudo passa |
+| `mvn test -Dsuite=inventory` | Ordenação (5 usuários) e detalhes do produto (usuário padrão) | 32 execuções, **8 falhas esperadas** |
+| `mvn test -Dsuite=product-users` | Detalhes do produto com os outros usuários | 16 execuções, **10 falhas esperadas** |
+| `mvn clean test` | Limpa o build antes de rodar | |
+
+**A regressão precisa ficar sempre verde**: é ela que roda na CI a cada push. Os testes que expõem os defeitos conhecidos dos usuários especiais ficam em suítes próprias (`inventory`, `product-users`). As falhas delas são esperadas e mostram que os testes encontram os bugs.
 
 Pelo VS Code, o botão ▶ ao lado da classe ou do método também funciona, exceto em `LoginTestParameters`, que depende do XML. Ele fica como *SKIP* se for executado pelo botão.
 
@@ -141,34 +200,85 @@ Pelo VS Code, o botão ▶ ao lado da classe ou do método também funciona, exc
 
 ---
 
-## Dados de teste (Excel)
+## Dados de teste
 
-**Padrão adotado: um arquivo por módulo e uma aba por funcionalidade.**
+Cada tipo de dado fica num lugar:
 
-- `LoginData.xlsx` → aba `Login`
-- `CheckoutData.xlsx` → abas `Cart` e `Checkout`
+| Tipo de dado | Onde fica | Exemplo |
+|---|---|---|
+| Configuração do ambiente (URL, navegador, senhas) | `config.properties` ou `-D` na linha de comando | `browser=chrome` |
+| Massa de dados dos cenários | Excel ou JSON em `testdata/` | `LoginData.xlsx`, `product-scenarios.json` |
+| Constantes do sistema (lista fechada, usada pelo nome) | `enum` ou constantes no código | `User.PROBLEM`, `InventoryPage.SORT_NAME_A_TO_Z` |
 
-Motivos: cada funcionalidade tem colunas diferentes, o nome do arquivo já diz o módulo (espelha `pages/` e `tests/`) e, em equipe, menos gente mexe no mesmo arquivo.
+Em todos os formatos, **um cenário por linha, com os valores esperados escritos**. Para criar um cenário novo, basta acrescentar uma linha, sem mexer no código.
 
-Regras das planilhas:
+### Excel (login, carrinho e checkout)
 
-- A linha 1 é o cabeçalho e as colunas seguem a mesma ordem dos parâmetros do método de teste.
+**Um arquivo por módulo e uma aba por funcionalidade:** `LoginData.xlsx` (aba `Login`) e `CheckoutData.xlsx` (abas `Cart` e `Checkout`).
+
+- A linha 1 é o cabeçalho, e as colunas seguem a mesma ordem dos parâmetros do método de teste.
 - A primeira coluna é sempre o `testId`: ele aparece no relatório e no nome do print.
 - `expectedResult` = `SUCCESS` ou `ERROR`, com a mensagem esperada em `expectedMessage`.
 - Célula vazia vira texto vazio, o que permite testar campos em branco.
-- Para criar um cenário novo, basta adicionar uma linha, sem mexer no código.
+
+### JSON (detalhes do produto)
+
+Cada arquivo é uma lista `[ ]` de cenários `{ }`. O Jackson converte cada cenário num objeto `ProductScenario` (um `record`):
+
+```json
+{
+  "testId": "PD07",
+  "scenario": "problem_user abre o primeiro produto (id 0)",
+  "user": "PROBLEM",
+  "productName": "Sauce Labs Bike Light",
+  "expectedId": 0,
+  "expectedPrice": 9.99,
+  "expectedDescription": "A red light isn't the desired state..."
+}
+```
+
+- As chaves do JSON têm **os mesmos nomes** dos campos do `ProductScenario`: é assim que o Jackson sabe onde colocar cada valor.
+- O campo `user` usa o nome da constante do enum (`"PROBLEM"`), e o Jackson converte para `User.PROBLEM`.
+- Os valores esperados são sempre os **corretos** (o requisito). Se o site errar, o teste falha e mostra o defeito.
+- JSON não aceita comentários: a justificativa da escolha dos cenários fica neste README e nos comentários das classes de teste.
+
+---
+
+## Técnicas de teste aplicadas
+
+Os cenários de `product-scenarios-users.json` foram escolhidos com técnicas da CTFL, em vez de combinar todos os usuários com todos os produtos (5 × 6 = 30):
+
+- **Particionamento de Equivalência (usuários):** cada perfil com comportamento diferente é uma partição. O `standard_user` já tem os 6 produtos em `product-scenarios.json`.
+- **Análise de Valor Limite (produtos):** os outros usuários testam só o **primeiro** (id 0) e o **último** (id 5) produto, os limites da faixa de ids que aparece na URL.
+
+Resultado: 8 cenários em vez de 24, detectando os mesmos defeitos. Por exemplo, o `problem_user` no último produto abre o id 6, que não existe ("ITEM NOT FOUND"): um defeito clássico de limite.
+
+**Risco aceito:** um defeito que aparecesse só num produto do meio da faixa, para um usuário especial, não seria detectado por esses cenários.
+
+---
+
+## Integração contínua (CI)
+
+| | GitHub Actions (`.github/workflows/ci.yml`) | Jenkins (`Jenkinsfile`) |
+|---|---|---|
+| Quando roda | a cada push e pull request na `master`, ou manualmente em *Actions* | verifica o repositório a cada ~5 minutos, ou manualmente em *Construir com parâmetros* |
+| Suíte padrão | `regression` | escolhida no parâmetro `SUITE` |
+| Execução | headless, no Linux | headless, no Windows |
+| E-mail | se os segredos `EMAIL_*` estiverem cadastrados no repositório | se as credenciais `email-*` estiverem cadastradas no Jenkins |
+| Resultados | relatório, prints e logs como *artifacts* da execução | aba *TestNG Results* e *Artefatos* do build |
+
+O `config.properties` real não vai para o Git. Na CI, ele é criado a partir do `config.properties.example`, e as senhas chegam como segredos.
 
 ---
 
 ## Como adicionar um novo requisito (passo a passo)
 
-Exemplo: **ordenação de produtos**.
-
-1. **Página**: em `pages/`, adicione os localizadores e ações. Pode ser numa página existente (`InventoryPage.sortBy(...)`) ou numa nova classe que herde de `BasePage`.
-2. **Dados**: crie uma aba nova no Excel do módulo (ex.: aba `Sort` no arquivo de produtos) ou um arquivo novo se for outro módulo.
-3. **DataProvider**: em `dataproviders/`, adicione um método `@DataProvider` que lê a aba.
-4. **Teste**: em `tests/<modulo>/`, crie a classe que herda de `BaseTest`, usa a página e faz os `Assert`.
-5. **Suíte**: inclua a classe na suíte do módulo e na `regression.xml`.
+1. **Página:** em `pages/`, adicione os localizadores e as ações, numa página existente ou numa nova classe que herde de `BasePage`. Inspecione os elementos no DevTools (Elements) e valide cada seletor com **Ctrl+F** antes de ir para o código.
+2. **Dados:** monte os cenários com os valores esperados, numa aba nova do Excel do módulo ou num arquivo JSON em `testdata/`.
+3. **Modelo (se for JSON):** crie um `record` em `src/main/java/.../data/` com os mesmos nomes das chaves do JSON.
+4. **DataProvider:** em `dataproviders/`, adicione um método `@DataProvider` que lê o arquivo.
+5. **Teste:** em `tests/<modulo>/`, crie a classe que herda de `BaseTest`, usa as páginas e faz os `Assert`.
+6. **Suíte:** inclua a classe na suíte do módulo. Se ela deve passar sempre, inclua também na `regression.xml`.
 
 ---
 
@@ -177,18 +287,22 @@ Exemplo: **ordenação de produtos**.
 | Módulo | Cenários |
 |---|---|
 | Login | 12 cenários: 5 usuários válidos e 7 erros (bloqueado, campos vazios, senha errada, usuário inexistente, case sensitive) |
+| Produtos: ordenação | 4 ordenações (padrão A–Z, Z–A, preço crescente e decrescente) × 5 usuários |
+| Produtos: detalhes | 6 produtos com o usuário padrão + 8 cenários com os outros usuários: preço na lista, id na URL, nome, descrição, preço e imagem; adicionar e remover pela página de detalhes |
 | Carrinho | Adicionar 1, 2 e todos os produtos (contador e itens no carrinho) |
 | Checkout | Compra concluída e validação dos 3 campos obrigatórios |
 
 ## Próximos requisitos (backlog)
 
-- [ ] **Ordenação de produtos**: Name (A to Z / Z to A) e Price (low to high / high to low).
+- [x] **Ordenação de produtos**: Name (A to Z / Z to A) e Price (low to high / high to low).
+- [x] **Detalhes do produto**: conferir nome, descrição e preço, adicionar e remover a partir dali e voltar.
+- [ ] **Usuários com defeitos conhecidos**: já cobertos na ordenação e nos detalhes; falta estender ao carrinho e ao checkout.
 - [ ] **Remover produto do carrinho**: pela lista de produtos e pelo carrinho, com atualização do contador.
-- [ ] **Detalhes do produto**: abrir o produto, conferir nome, descrição e preço, adicionar ao carrinho a partir dali e voltar.
 - [ ] **Cálculo do resumo do pedido**: Item total = soma dos preços; Tax = 8%; Total = item total + tax.
 - [ ] **Cancelar o checkout**: Cancel em cada passo e Continue Shopping no carrinho.
-- [ ] **Menu lateral**: Logout, Reset App State (limpa o carrinho), All Items e About.
+- [ ] **Menu lateral**: Logout, Reset App State (limpa o carrinho), All Items e About (ações já prontas no `HeaderComponent`).
 - [ ] **Acesso sem login**: abrir `/inventory.html` direto deve voltar para o login com mensagem de erro.
 - [ ] **Persistência do carrinho**: itens continuam no carrinho ao navegar e após logout/login.
-- [ ] **Usuários com defeitos conhecidos**: `problem_user`, `error_user`, `visual_user` e `performance_glitch_user` (testes que devem encontrar os bugs).
-- [ ] **Rodapé**: links das redes sociais.
+- [ ] **Rodapé**: links das redes sociais (ações já prontas no `FooterComponent`).
+- [ ] **Recibo em PDF**: baixar o PDF do pedido e validar itens, comprador, valores e data (atenção: o nome do arquivo usa horário UTC e o conteúdo, o horário local).
+- [ ] **Dynamic Catalog**: páginas Lazy Load, Spinner e Slider.
