@@ -7,6 +7,7 @@ A aplicação testada é o [Sauce Demo](https://www.saucedemo.com/), uma loja vi
 
 - Testes orientados a dados com **Excel**, **JSON**, dados fixos e parâmetros do XML do TestNG.
 - Testes com **todos os perfis de usuário** do Sauce Demo, inclusive os que têm defeitos de propósito.
+- Validação de **arquivo baixado**: o recibo do pedido em PDF é baixado pelo navegador e tem o conteúdo conferido.
 - Relatório HTML (Extent Reports) com prints, logs (Log4j2) e envio do relatório por e-mail.
 - Navegador e modo headless escolhidos por configuração.
 - Integração contínua com **GitHub Actions** e **Jenkins**.
@@ -22,6 +23,7 @@ A aplicação testada é o [Sauce Demo](https://www.saucedemo.com/), uma loja vi
 | TestNG | Organiza e executa os testes (anotações, DataProvider, suítes, listeners) |
 | Apache POI | Lê os dados de teste das planilhas Excel |
 | Jackson | Lê os dados de teste dos arquivos JSON |
+| Apache PDFBox | Lê o texto do recibo em PDF baixado |
 | Extent Reports | Gera o relatório HTML da execução |
 | Log4j2 | Gera os logs no console e em arquivo |
 | Jakarta Mail | Envia o relatório por e-mail |
@@ -47,7 +49,7 @@ selenium-framework/
 │   │   │   ├── ProductScenario.java        # record: um cenário do teste de detalhes do produto
 │   │   │   └── OrderScenario.java          # record: um cenário do cálculo do resumo do pedido
 │   │   ├── driver/
-│   │   │   └── DriverFactory.java          # Cria o navegador (chrome/firefox/edge, headless)
+│   │   │   └── DriverFactory.java          # Cria o navegador (chrome/firefox/edge, headless) e define a pasta de downloads
 │   │   ├── pages/                          # PAGE OBJECTS: uma classe por página
 │   │   │   ├── BasePage.java               # Base de todas as páginas: esperas e ações comuns
 │   │   │   ├── LoginPage.java
@@ -69,6 +71,8 @@ selenium-framework/
 │   │       ├── JsonUtils.java              # Leitura dos arquivos JSON
 │   │       ├── EmailUtils.java             # Envio de e-mail (SMTP)
 │   │       ├── ScreenshotUtils.java        # Captura de tela
+│   │       ├── DownloadUtils.java          # Limpa a pasta de downloads e espera o arquivo terminar de baixar
+│   │       ├── PdfUtils.java               # Extrai o texto de um PDF (PDFBox)
 │   │       └── Log.java                    # Atalho para o Log4j2
 │   ├── main/resources/
 │   │   └── log4j2.xml                      # Configuração dos logs
@@ -98,7 +102,8 @@ selenium-framework/
 │   │       ├── checkout/
 │   │       │   ├── CheckoutTest.java
 │   │       │   ├── CancelCheckoutTest.java # Cancel em cada passo e Continue Shopping
-│   │       │   └── OrderSummaryTest.java   # Cálculo do resumo: item total, taxa e total
+│   │       │   ├── OrderSummaryTest.java   # Cálculo do resumo: item total, taxa e total
+│   │       │   └── OrderReceiptPdfTest.java# Recibo em PDF: download e conteúdo
 │   │       └── navigation/                 # Partes presentes em todas as páginas
 │   │           ├── SideMenuTest.java       # Menu lateral: All Items, About, Logout, Reset App State
 │   │           └── FooterTest.java         # Rodapé: redes sociais e copyright
@@ -110,7 +115,7 @@ selenium-framework/
 │       │   ├── CheckoutData.xlsx           # abas Cart e Checkout
 │       │   ├── product-scenarios.json      # detalhes do produto: usuário padrão
 │       │   ├── product-scenarios-users.json# detalhes do produto: outros usuários
-│       │   └── order-scenarios.json        # cálculo do resumo do pedido
+│       │   └── order-scenarios.json        # cálculo do resumo do pedido e recibo em PDF
 │       └── suites/                         # Suítes do TestNG
 │           ├── regression.xml              # Regressão (padrão do mvn test): deve ficar verde
 │           ├── login.xml
@@ -122,7 +127,8 @@ selenium-framework/
 ├── docs/exemplos-aula/                     # Material de estudo, fora da compilação
 │   └── LoginPageBasica.java                # Page Object com By (antes do PageFactory)
 ├── reports/      # (gerado) relatórios HTML           ┐
-├── screenshots/  # (gerado) prints SUCCESS/FAILURE/SKIP ├─ ignorados pelo Git
+├── screenshots/  # (gerado) prints SUCCESS/FAILURE/SKIP │
+├── downloads/    # (gerado) PDFs baixados nos testes    ├─ ignorados pelo Git
 ├── logs/         # (gerado) selenium-framework.log     │
 └── target/       # (gerado) build do Maven            ┘
 ```
@@ -177,6 +183,7 @@ Uso: `new LoginPage(driver).loginAs(User.PROBLEM)`.
 
 1. Copie `src/test/resources/config.properties.example` para `config.properties` na mesma pasta.
 2. Preencha os dados de e-mail (ou deixe `email.enabled=false`).
+3. Se quiser, troque a pasta de downloads em `download.dir` (padrão: `downloads`, dentro do projeto). Ela é limpa antes de cada teste do PDF.
 
 Qualquer chave pode ser trocada numa execução, sem editar o arquivo:
 
@@ -190,10 +197,11 @@ mvn test -Dbrowser=firefox -Dheadless=true -Demail.enabled=false
 
 | Comando | O que roda | Resultado esperado |
 |---|---|---|
-| `mvn test` | Regressão (`regression.xml`): login, carrinho, checkout, cálculo do resumo, detalhes do produto, menu lateral e rodapé | tudo passa |
+| `mvn test` | Regressão (`regression.xml`): login, carrinho, checkout, cálculo do resumo, recibo em PDF, detalhes do produto, menu lateral e rodapé | tudo passa |
 | `mvn test -Dsuite=login` | Só login | tudo passa |
 | `mvn test -Dsuite=login-parameters` | Login com parâmetros do XML | tudo passa |
-| `mvn test -Dsuite=checkout` | Carrinho, checkout e cálculo do resumo do pedido | tudo passa |
+| `mvn test -Dsuite=checkout` | Carrinho, checkout, cálculo do resumo e recibo em PDF | tudo passa |
+| `mvn test -Dtest=OrderReceiptPdfTest` | Só uma classe, sem usar o XML da suíte (útil para testar algo novo) | |
 | `mvn test -Dsuite=inventory` | Ordenação (5 usuários) e detalhes do produto (usuário padrão) | 32 execuções, **8 falhas esperadas** |
 | `mvn test -Dsuite=product-users` | Detalhes do produto com os outros usuários | 16 execuções, **10 falhas esperadas** |
 | `mvn test -Dsuite=navigation` | Menu lateral (inclui acesso sem login) e rodapé | tudo passa |
@@ -208,6 +216,7 @@ Pelo VS Code, o botão ▶ ao lado da classe ou do método também funciona, exc
 - `reports/ExtentReport_<data-hora>.html`: relatório com passos, resultado e prints das falhas.
 - `screenshots/SUCCESS|FAILURE|SKIP/<método>_<id>_<parâmetro>_<data-hora>.png`, por exemplo `testSortByNameZToA_ORD02_problem_user_...png`.
   O id vem do nome do teste no relatório, no padrão **`ID - descrição`** (ex.: `FTR01 - Links das redes sociais`). Testes que seguem esse padrão ganham o id no print automaticamente.
+- `downloads/swag-labs-order-<data-hora>.pdf`: recibo baixado no teste do PDF (a pasta é limpa a cada cenário).
 - `logs/selenium-framework.log`
 - E-mail com o resumo (passou/falhou) e o relatório anexo, se `email.enabled=true`.
 
@@ -234,7 +243,7 @@ Em todos os formatos, **um cenário por linha, com os valores esperados escritos
 - `expectedResult` = `SUCCESS` ou `ERROR`, com a mensagem esperada em `expectedMessage`.
 - Célula vazia vira texto vazio, o que permite testar campos em branco.
 
-### JSON (detalhes do produto e resumo do pedido)
+### JSON (detalhes do produto, resumo do pedido e recibo em PDF)
 
 Cada arquivo é uma lista `[ ]` de cenários `{ }`. O Jackson converte cada cenário num objeto `ProductScenario` (um `record`):
 
@@ -270,6 +279,18 @@ Os cenários de `product-scenarios-users.json` foram escolhidos com técnicas da
 Resultado: 8 cenários em vez de 24, detectando os mesmos defeitos. Por exemplo, o `problem_user` no último produto abre o id 6, que não existe ("ITEM NOT FOUND"): um defeito clássico de limite.
 
 **Risco aceito:** um defeito que aparecesse só num produto do meio da faixa, para um usuário especial, não seria detectado por esses cenários.
+
+---
+
+## Recibo em PDF: como o teste funciona
+
+1. Antes de cada cenário, `DownloadUtils.cleanDownloadDir()` esvazia a pasta `downloads/`. Assim o teste nunca confere um PDF antigo.
+2. O `DriverFactory` configura o navegador para salvar os downloads nessa pasta, sem perguntar onde salvar (funciona também em headless).
+3. O teste conclui o pedido e clica em **Generate PDF order**.
+4. `DownloadUtils.waitForFile(...)` espera o arquivo aparecer e terminar de baixar, como uma espera explícita, mas para arquivos.
+5. `PdfUtils.readText(...)` extrai o texto do PDF com o PDFBox, e o teste confere o conteúdo com `Assert`. O texto extraído também vai para o relatório, para facilitar a análise de falhas.
+
+**Atenção às datas:** o **nome do arquivo** usa o horário **UTC** do pedido, e o **conteúdo** do PDF usa o horário **local** do navegador. Por isso o teste compara cada um com o fuso certo e aceita uma pequena diferença de tempo. Isso garante que o teste passe tanto no Jenkins (Windows, horário de Brasília) quanto no GitHub Actions (Linux, UTC).
 
 ---
 
@@ -311,6 +332,7 @@ O `config.properties` real não vai para o Git. Na CI, ele é criado a partir do
 | Checkout | Compra concluída e validação dos 3 campos obrigatórios |
 | Checkout: cancelar | Cancel nos dados do comprador volta ao carrinho; Cancel no resumo e Continue Shopping voltam aos produtos, sem perder o carrinho |
 | Checkout: cálculo do resumo | 5 pedidos (1 item mais barato, 1 item mais caro, 2 itens, 3 itens e os 6 produtos): item total, taxa de 8% e total |
+| Checkout: recibo em PDF | Os mesmos 5 pedidos: o PDF é baixado e confere nome do arquivo (data e hora), comprador, itens iguais aos da tela, item total, taxa, total e data do pedido |
 | Menu lateral | Abrir e fechar; All Items; About abre o site da Sauce Labs na mesma aba; Logout e bloqueio de acesso sem login; Reset App State esvazia o carrinho |
 | Rodapé | Links das redes sociais (endereço e abertura em nova aba), copyright com o ano atual, mesmo rodapé no carrinho |
 
@@ -330,11 +352,11 @@ O `config.properties` real não vai para o Git. Na CI, ele é criado a partir do
 - [x] **Remover produto do carrinho**: pela lista de produtos e pelo carrinho, com atualização do contador.
 - [x] **Cancelar o checkout**: Cancel em cada passo e Continue Shopping no carrinho.
 - [x] **Persistência do carrinho**: ao navegar, ao recarregar a página e após logout/login.
+- [x] **Recibo em PDF**: baixar o PDF do pedido e validar itens, comprador, valores e data.
 - [x] **Infraestrutura**: Page Object com componentes, relatório Extent com prints, logs, envio do relatório por e-mail, CI no GitHub Actions e no Jenkins.
 
 ### Pendente
 
-- [ ] **Recibo em PDF**: baixar o PDF do pedido e validar itens, comprador, valores e data (atenção: o nome do arquivo usa horário UTC e o conteúdo, o horário local).
 - [ ] **Dynamic Catalog**: páginas Lazy Load, Spinner e Slider.
 
 ## Defeitos encontrados (ainda sem teste)
