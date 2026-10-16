@@ -47,10 +47,10 @@ jobs:
 
     steps:
       - name: Baixar o código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Instalar Java 17 (com cache do Maven)
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -82,7 +82,7 @@ jobs:
 
       - name: Publicar relatório, prints e logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: resultados-${{ env.SUITE }}-${{ github.run_number }}
           path: |
