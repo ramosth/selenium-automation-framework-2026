@@ -397,6 +397,7 @@ O `config.properties` real não vai para o Git. Na CI, ele é criado a partir do
 - **Reset App State não atualiza os botões da lista de produtos** (inclusive com o `standard_user`): o carrinho é esvaziado, mas os produtos continuam mostrando "Remove" até a página ser recarregada.
 - **About com o `problem_user`** aponta para `https://saucelabs.com/error/404`, em vez do site da Sauce Labs.
 - **Item repetido no Lazy Load**: as posições 13 e 14 da lista mostram o mesmo produto, `Test.allTheThings() T-Shirt (Red) (L)`. Os outros produtos aparecem uma vez em cada tamanho.
+- **Carrinho aparece vazio ao clicar no ícone do carrinho estando na própria página do carrinho** (inclusive com o `standard_user`): depois de remover um item na página do carrinho, um novo clique no ícone do carrinho exibe a lista vazia, embora o contador continue mostrando os itens restantes. Encontrado durante a migração para Cucumber e confirmado manualmente.
 
 ### Dúvida de requisito
 
