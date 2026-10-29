@@ -402,3 +402,18 @@ O `config.properties` real não vai para o Git. Na CI, ele é criado a partir do
 ### Dúvida de requisito
 
 - **O carrinho continua após o logout**, porque fica guardado no navegador e não na conta do usuário. Se outra pessoa entrar com **outro usuário** no mesmo navegador, verá o carrinho de quem saiu. O teste PER03 protege o comportamento atual, mas vale confirmar com o time se o carrinho deveria ser por usuário.
+
+---
+
+## Portfólio
+
+| Projeto | Foco |
+|---|---|
+| **selenium-automation-framework-2026** | **Selenium + TestNG (UI)** |
+| [selenium-cucumber-testng-2026](https://github.com/ramosth/selenium-cucumber-testng-2026) | Selenium + Cucumber + TestNG (UI) |
+| [selenium-cucumber-junit-2026](https://github.com/ramosth/selenium-cucumber-junit-2026) | Selenium + Cucumber + JUnit 5 (UI) |
+| [restassured-cucumber-junit-2026](https://github.com/ramosth/restassured-cucumber-junit-2026) | REST Assured + Cucumber + JUnit 5 (API) |
+
+---
+
+Thamires Ramos · QA Analyst
