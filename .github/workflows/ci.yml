@@ -48,6 +48,10 @@ jobs:
     steps:
       - name: Baixar o código
         uses: actions/checkout@v5
+        with:
+          # Histórico completo: o Sonar usa o "git blame" para saber
+          # o que é código novo e quem alterou cada linha
+          fetch-depth: 0
 
       - name: Instalar Java 17 (com cache do Maven)
         uses: actions/setup-java@v5
@@ -71,7 +75,7 @@ jobs:
           if [ -n "$EMAIL_APP_PASSWORD" ]; then EMAIL_ENABLED=true; else EMAIL_ENABLED=false; fi
           echo "Envio de e-mail: $EMAIL_ENABLED"
 
-          mvn -B test \
+          mvn -B verify \
             -Dsuite="$SUITE" \
             -Dbrowser="$BROWSER" \
             -Dheadless=true \
@@ -79,6 +83,16 @@ jobs:
             -Demail.sender="$EMAIL_SENDER" \
             -Demail.appPassword="$EMAIL_APP_PASSWORD" \
             -Demail.recipients="$EMAIL_RECIPIENTS"
+
+      - name: Análise no SonarQube Cloud (só na regression)
+        # Roda só se os testes passaram (comportamento padrão dos steps)
+        # e só na regression, para a cobertura ser sempre comparável.
+        if: env.SUITE == 'regression'
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # Não recompila nem roda testes: lê o target/classes e o jacoco.xml
+        # gerados no passo anterior e envia tudo para o SonarQube Cloud.
+        run: mvn -B sonar:sonar
 
       - name: Publicar relatório, prints e logs
         if: always()

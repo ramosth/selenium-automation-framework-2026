@@ -15,6 +15,13 @@
     <!-- Suíte executada pelo "mvn test" (arquivos em src/test/resources/suites).
          Para trocar: mvn test -Dsuite=login | checkout | login-parameters -->
     <suite>regression</suite>
+
+    <!-- SonarQube Cloud: para onde a análise é enviada -->
+    <sonar.organization>ramosth</sonar.organization>
+    <sonar.projectKey>ramosth_selenium-automation-framework-2026</sonar.projectKey>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <!-- Relatório de cobertura gerado pelo JaCoCo (o Sonar só lê, não mede) -->
+    <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
   <dependencies>
@@ -96,11 +103,39 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.5.4</version>
         <configuration>
-          <forkCount>0</forkCount>
           <suiteXmlFiles>
             <suiteXmlFile>src/test/resources/suites/${suite}.xml</suiteXmlFile>
           </suiteXmlFiles>
         </configuration>
+      </plugin>
+      
+      <!-- JaCoCo: mede a cobertura enquanto os testes rodam e gera o relatório no "verify" -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.15</version>
+        <executions>
+          <execution>
+            <id>preparar-agente</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>gerar-relatorio</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Scanner do Sonar para Maven (versão fixa, em vez de "a mais nova que houver") -->
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>5.7.0.6970</version>
       </plugin>
     </plugins>
   </build>
