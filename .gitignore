@@ -154,11 +154,11 @@ maven-repository/
 maven-metadata-local.xml
 .maven_repos/
 
-reports/
-screenshots/
+/reports/
+/screenshots/
 
 # PDFs baixados pelos testes
-downloads/
+/downloads/
 
 ### Visual_studio ###
 # visual_studio editor specific files

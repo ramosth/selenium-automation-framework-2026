@@ -34,7 +34,7 @@ import com.test.automation.utils.ScreenshotUtils;
  *             suíte
  */
 @Listeners(EmailReportListener.class)
-public class BaseTest {
+public abstract class BaseTest {
 
     protected WebDriver driver;
     protected static ExtentReports extent;

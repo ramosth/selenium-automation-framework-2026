@@ -85,7 +85,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.18.2</version>
+      <version>2.22.4</version>
     </dependency>
 
     <!-- Leitura de arquivos PDF (recibo do pedido) -->
@@ -108,7 +108,7 @@
           </suiteXmlFiles>
         </configuration>
       </plugin>
-      
+
       <!-- JaCoCo: mede a cobertura enquanto os testes rodam e gera o relatório no "verify" -->
       <plugin>
         <groupId>org.jacoco</groupId>
