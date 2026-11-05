@@ -6,9 +6,8 @@ import java.util.List;
 
 /**
  * Utilitário de preços do Sauce Demo ("$29.99", subtotal, imposto, total).
- *
- * EXERCÍCIO DO QUALITY GATE: esta classe entra SEM nenhum teste que a use,
- * para o SonarQube Cloud reprovar a condição de cobertura do código novo.
+ * Usa BigDecimal para evitar erros de arredondamento do double em valores monetários.
+ * Coberto por testes unitários em tests/unit/PriceUtilsTest.
  */
 public final class PriceUtils {
 

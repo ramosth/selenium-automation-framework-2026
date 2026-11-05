@@ -10,7 +10,7 @@ import com.test.automation.utils.PriceUtils;
 
 /**
  * Testes unitários do PriceUtils (sem navegador, não estende o BaseTest).
- * Exercício do Quality Gate: cobrem as linhas novas do PR.
+ * Rodam na suíte regression, no bloco "Unitários - utils".
  */
 public class PriceUtilsTest {
 
