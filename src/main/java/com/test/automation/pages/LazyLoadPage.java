@@ -105,24 +105,44 @@ public class LazyLoadPage extends BasePage {
 
     // ---------- AÇÕES ----------
 
-    /**
+        /**
      * Rola até o fim da lista e espera os novos cards aparecerem.
      * false se nenhum card novo aparecer no tempo limite.
      */
     public boolean loadMore() {
         int before = getCardCount();
         Log.info("Rolando até o fim da lista (" + before + " cards).");
-        // block 'end' deixa o marcador na borda de baixo da tela: os cards novos nascem abaixo dela,
-        // e o marcador sai da tela. Assim cada rolagem carrega um lote só.
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'end'});", sentinelElement);
         try {
-            // Espera personalizada: "até a quantidade de cards ficar maior que antes"
-            wait.until(d -> d.findElements(cards).size() > before);
+            // O site só carrega mais quando o marcador ENTRA na tela (mudança de fora para dentro).
+            // Se ele já estiver visível, um scroll só não basta. Por isso, a cada tentativa da
+            // espera (a cada 0,5 s), o marcador sai da tela e volta.
+            wait.until(d -> {
+                if (d.findElements(cards).size() > before) {
+                    return true;
+                }
+                retriggerSentinel();
+                return d.findElements(cards).size() > before;
+            });
             return true;
         } catch (TimeoutException e) {
             Log.warn("Nenhum card novo foi carregado após rolar até o fim.");
             return false;
         }
+    }
+
+    /**
+     * Tira o marcador do fim da lista da tela e traz de volta, para o site "ver" a entrada dele.
+     * Entre os dois movimentos, espera o navegador desenhar a tela (requestAnimationFrame);
+     * sem isso, os dois scrolls aconteceriam no mesmo quadro e o site não perceberia a saída.
+     */
+    private void retriggerSentinel() {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("window.scrollBy(0, -window.innerHeight);");
+        js.executeAsyncScript(
+                "const done = arguments[arguments.length - 1];"
+                        + "requestAnimationFrame(() => requestAnimationFrame(done));");
+        // block 'end' deixa o marcador na borda de baixo da tela: os cards novos nascem abaixo dela
+        js.executeScript("arguments[0].scrollIntoView({block: 'end'});", sentinelElement);
     }
 
     /** Rola quantas vezes for preciso até existir o card dessa posição. false se não conseguir. */
