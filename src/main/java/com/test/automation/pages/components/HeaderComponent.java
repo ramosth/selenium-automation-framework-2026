@@ -203,9 +203,12 @@ public class HeaderComponent extends BasePage {
     public CartPage openCart() {
         Log.info("Abrindo o carrinho.");
         click(cartLinkElement);
-        // Sem esta espera, a contagem pode ler os nomes da lista de produtos
-        // (mesmo data-test) antes de a página do carrinho abrir
+        // A URL muda ANTES de o React redesenhar a tela: por alguns milissegundos a
+        // lista
+        // de produtos (mesmo data-test dos itens do carrinho) ainda está na página.
+        // Por isso esperamos também o botão "Checkout", que só existe no carrinho.
         wait.until(ExpectedConditions.urlContains("cart.html"));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("checkout")));
         return new CartPage(driver);
     }
 }
